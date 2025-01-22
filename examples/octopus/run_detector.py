@@ -3,9 +3,8 @@ from omegaconf import OmegaConf
 from mma_gw.agent import ClientAgent
 from mma_gw.communicator.octopus import OctopusClientCommunicator
 
-from inference_utils import *
+from mma_gw.generator.inference_utils import *
 from tqdm import tqdm
-import glob
 import time
 import json
 

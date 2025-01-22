@@ -1,9 +1,4 @@
-import os
 import uuid
-import pathlib
-import importlib
-import torch.nn as nn
-from datetime import datetime
 from proxystore.store import Store
 from mma_gw.compressor import *
 from mma_gw.generator import GWGenerator
@@ -11,11 +6,9 @@ from mma_gw.config import ClientAgentConfig
 from omegaconf import DictConfig, OmegaConf
 from typing import Union, Dict, OrderedDict, Tuple, Optional
 from mma_gw.logger import ClientAgentFileLogger
-
-import h5py
-import numpy as np
-
 from mma_gw.model.GW_client_model import ClientModel
+import h5py
+
 
 class ClientAgent:
     """

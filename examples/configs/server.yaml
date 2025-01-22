@@ -3,6 +3,9 @@ client_configs:
     # trainer: "GWTrainer"
     do_inference: True
   comm_configs:
+    octopus_configs:
+      # server tells client which topic to send embeddings to
+      topic: 'mma-GWwave-Triggers'
     compressor_configs:
       enable_compression: False
 

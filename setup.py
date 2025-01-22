@@ -2,17 +2,11 @@ import setuptools
 
 # Build Author list
 authors = {
-    "Kibaek Kim": "kimk@anl.gov",
-    "Minseok Ryu": "minseok.ryu@asu.edu",
-    "Youngdae Kim": "youngdae@anl.gov",
-    "Hieu Hoang": "thoang@anl.gov",
-    "Zachary Ross": "zross@anl.gov",
+    "Parth Patel": "parth.patel@anl.gov",
     "Zilinghan Li": "zilinghan.li@anl.gov",
-    "Sang-il Yim": "yim@anl.gov",
-    "Shourya Bose": "shbose@ucsc.edu",
-    "Shilan He": "shilanh2@illinois.edu",
-    "Grant Wilkins": "gfw27@cam.ac.uk",
-    "Ravi Madduri": "madduri@anl.gov",
+    "Eliu Huerta": "elihu@anl.gov",
+    "Victoria Tiki": "victoria.t.tiki@gmail.com",
+    "Haochen Pan": "haochenpan@uchicago.edu",
 }
 AUTHOR = ""
 for i, (k, v) in enumerate(authors.items()):
@@ -24,15 +18,15 @@ with open("README.md", "r", encoding="utf-8") as fh:
     long_description = fh.read()
 
 setuptools.setup(
-    name="appfl",
+    name="mma_gw",
     version="1.0.0",
     author=AUTHOR,
-    description="An open-source package for privacy-preserving federated learning",
+    description="An open-source package for federated gravitational wave detection",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    url="https://github.com/APPFL/APPFL",
+    url="https://github.com/parth7stark/MMA_GravitationalWave",
     project_urls={
-        "Bug Tracker": "https://github.com/APPFL/APPFL/issues",
+        "Bug Tracker": "https://github.com/parth7stark/MMA_GravitationalWave/issues",
     },
     classifiers=[
         "Programming Language :: Python :: 3",
@@ -41,17 +35,13 @@ setuptools.setup(
     ],
     package_dir={"": "src"},
     packages=setuptools.find_packages(where="src"),
-    python_requires=">=3.8",
+    python_requires=">=3.10",
     install_requires=[
-        "numpy",
-        "torch",
-        "grpcio",
-        "grpcio-tools",
+        "numpy",  #installing specific version after pip install .
+        "torch",  #installing specific version after pip install .
         "omegaconf",
-        "globus-sdk",
-#        "mpi4py",
-        "globus-compute-sdk",
-        "globus-compute-endpoint",
+        "diaspora-event-sdk[kafka-python]",
+        # "lalsuite", installing using conda (refer apptainer defination file) before pip install . setup.py
         "boto3",
         "botocore",
         "proxystore[all]",
@@ -60,39 +50,15 @@ setuptools.setup(
         "zstd",
         "blosc",
         "python-xz",
+        "h5py",
+        "scipy",
+        "matplotlib",
+
     ],
     extras_require={
-        "dev": [
-            "sphinx",
-            "sphinx_rtd_theme",
-            "pydata-sphinx-theme",
-            "sphinx-design",
-            "sphinx-copybutton",
-            "sphinx-contributors",
-            "myst-parser",
-            "nbsphinx",
-            "twine",
-            "build",
-            "black",
-            "pytest",
-            "pytest-mpi",
-        ],
         "examples": [
-            "opencv-python",
-            "torchvision",
-            "pandas",
-            "pyarrow",
-            "fastparquet",
-            "tqdm",
-            "jupyter",
-            "matplotlib",
-            "wget",
+            "tqdm", # used by run_detector.py
         ],
     },
-    entry_points={
-        "console_scripts": [
-            "appfl-auth=appfl.login_manager.globus.cli:auth",
-            "appfl-install-compressor=appfl.compressor.install:install_compressor"
-        ],
-    },
+   
 )

@@ -1,7 +1,7 @@
 import warnings
 import functools
 from packaging import version
-appfl_version = '1.0.0'
+mma_gw_version = '1.0.0'
 
 # A set to keep track of warnings that have already been shown
 _emitted_warnings = set()
@@ -15,7 +15,7 @@ def deprecated(reason='', silent=False, removal_version='2.0.0'):
     error will be raised.
     """
     def decorator(obj):
-        current_version = version.parse(appfl_version)
+        current_version = version.parse(mma_gw_version)
         removal_ver = version.parse(removal_version)
 
         if current_version >= removal_ver:

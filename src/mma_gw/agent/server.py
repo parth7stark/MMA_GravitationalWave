@@ -1,18 +1,13 @@
-import io
-import time
 import torch
 import threading
-import torch.nn as nn
 from mma_gw.aggregator import *
 from mma_gw.compressor import *
 from mma_gw.config import ServerAgentConfig
 from mma_gw.logger import ServerAgentFileLogger
-
 from omegaconf import OmegaConf, DictConfig
 from typing import Union, Dict, OrderedDict, Tuple, Optional
 from proxystore.store import Store
 from proxystore.proxy import Proxy, extract
-
 from mma_gw.model.GW_server_model import ServerModel
 
 class ServerAgent:
