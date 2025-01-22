@@ -1,0 +1,55 @@
+Bootstrap: docker
+From: nvidia/cuda:11.8.0-cudnn8-runtime-ubuntu20.04
+
+%post
+#!/bin/bash -o pipefail
+#similar to alphafold
+    # Update system and install python
+    apt-get update \
+    && DEBIAN_FRONTEND=noninteractive apt-get install --no-install-recommends -y \
+    git \
+    wget \
+    && rm -rf /var/lib/apt/lists/* \
+    && apt-get autoremove -y \
+    && apt-get clean
+    
+    # Install Miniconda package manager.
+    wget -q -P /tmp \
+    https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh \
+    && bash /tmp/Miniconda3-latest-Linux-x86_64.sh -b -p /opt/conda \
+    && rm /tmp/Miniconda3-latest-Linux-x86_64.sh
+
+    # Update PATH to use conda during this build phase
+    export PATH="/opt/conda/bin:$PATH"
+    export LD_LIBRARY_PATH="/opt/conda/lib:$LD_LIBRARY_PATH"
+
+    # Install conda packages
+    conda install -qy conda==24.5.0 pip python=3.10
+    conda install --channel conda-forge lalsuite
+    conda clean --all --force-pkgs-dirs --yes
+
+    # Set up the working directory
+    mkdir -p /app
+
+    # Install pip packages
+    # Install VFL requirements.txt -- removed pytorch from it since we will install later
+    pip3 install -r /app/requirements.txt
+    pip3 install h5py pytorch-lightning
+
+    pip3 install -e /app
+
+    pip3 install torch==2.1.2 torchvision==0.16.2 torchaudio==2.1.2 --index-url https://download.pytorch.org/whl/cu118
+    pip3 install numpy==1.24.2    
+    pip3 install "diaspora-event-sdk[kafka-python]"
+
+    cd /app
+
+%files
+    # Copy all files to /app during build
+    . /app
+
+%environment
+    # Set environment variables
+    export PATH="/opt/conda/bin:$PATH"
+    export LD_LIBRARY_PATH="/opt/conda/lib:$LD_LIBRARY_PATH"
+

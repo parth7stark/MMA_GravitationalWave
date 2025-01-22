@@ -1,0 +1,58 @@
+Metadata-Version: 2.1
+Name: appfl
+Version: 1.0.0
+Summary: An open-source package for privacy-preserving federated learning
+Home-page: https://github.com/APPFL/APPFL
+Author: Kibaek Kim <kimk@anl.gov>, Minseok Ryu <minseok.ryu@asu.edu>, Youngdae Kim <youngdae@anl.gov>, Hieu Hoang <thoang@anl.gov>, Zachary Ross <zross@anl.gov>, Zilinghan Li <zilinghan.li@anl.gov>, Sang-il Yim <yim@anl.gov>, Shourya Bose <shbose@ucsc.edu>, Shilan He <shilanh2@illinois.edu>, Grant Wilkins <gfw27@cam.ac.uk>, Ravi Madduri <madduri@anl.gov>
+Project-URL: Bug Tracker, https://github.com/APPFL/APPFL/issues
+Classifier: Programming Language :: Python :: 3
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Operating System :: OS Independent
+Requires-Python: >=3.8
+Description-Content-Type: text/markdown
+License-File: LICENSE
+Requires-Dist: numpy
+Requires-Dist: torch
+Requires-Dist: grpcio
+Requires-Dist: grpcio-tools
+Requires-Dist: omegaconf
+Requires-Dist: globus-sdk
+Requires-Dist: mpi4py
+Requires-Dist: globus-compute-sdk
+Requires-Dist: globus-compute-endpoint
+Requires-Dist: boto3
+Requires-Dist: botocore
+Requires-Dist: proxystore[all]
+Requires-Dist: lz4
+Requires-Dist: zfpy
+Requires-Dist: zstd
+Requires-Dist: blosc
+Requires-Dist: python-xz
+Provides-Extra: dev
+Requires-Dist: sphinx; extra == "dev"
+Requires-Dist: sphinx_rtd_theme; extra == "dev"
+Requires-Dist: pydata-sphinx-theme; extra == "dev"
+Requires-Dist: sphinx-design; extra == "dev"
+Requires-Dist: sphinx-copybutton; extra == "dev"
+Requires-Dist: sphinx-contributors; extra == "dev"
+Requires-Dist: myst-parser; extra == "dev"
+Requires-Dist: nbsphinx; extra == "dev"
+Requires-Dist: twine; extra == "dev"
+Requires-Dist: build; extra == "dev"
+Requires-Dist: black; extra == "dev"
+Requires-Dist: pytest; extra == "dev"
+Requires-Dist: pytest-mpi; extra == "dev"
+Provides-Extra: examples
+Requires-Dist: opencv-python; extra == "examples"
+Requires-Dist: torchvision; extra == "examples"
+Requires-Dist: pandas; extra == "examples"
+Requires-Dist: pyarrow; extra == "examples"
+Requires-Dist: fastparquet; extra == "examples"
+Requires-Dist: tqdm; extra == "examples"
+Requires-Dist: jupyter; extra == "examples"
+Requires-Dist: matplotlib; extra == "examples"
+Requires-Dist: wget; extra == "examples"
+
+This repo contains implementation of Vertical Federated learning workflow used to train gravitational wave detection AI model using distributed data
+
+For more details refer following document: https://anl.app.box.com/s/ir9moszx0eve9nd6pqzqiitvt5r2v4xj

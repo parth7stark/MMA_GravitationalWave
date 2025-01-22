@@ -1,0 +1,47 @@
+client_id: '0'
+generator_configs:
+  # Device
+  device: "cpu"
+  # Training
+  # optim: Adam
+  # optim_args:
+  #   lr: 0.01
+  # Logging and outputs
+  logging_id: "LIGO_Livingston"
+  logging_output_dirname: "./output"
+  logging_output_filename: "result"
+
+inference_configs:
+  batch_size: 2
+  dataset_path: "/u/parthpatel7173/GW_VFL_data/Inference_data/Feb_Events/GW200129_065458_1264314069.hdf5"
+  # noise_dir: "/scratch/bcbw/parthpatel7173/bbke_files/WaveNet_data/Gaussian_Noise/"
+  length: None
+
+model_configs:
+  # model_path: "./model/GW_client_model.py"
+  # model_name: "ClientModel"
+  checkpoint_dir: "/u/parthpatel7173/GW_VFL_data/2channel_ckpts/detector_1_sub_mod_A.ckpt"
+  
+  # model_kwargs:
+  #   input_dim: 3
+  #   output_dim: 8
+  #   hidden_dim: 24
+
+# Local dataset
+# data_configs:
+#   dataset_path: "./dataset/GW_client_data.py"
+#   dataset_name: "get_wavedata"
+#   dataset_kwargs:
+#     client_id: 0
+#     dataset_dir: "/u/parthpatel7173/GW_VFL_data"
+    # 1 batch of data
+
+comm_configs:
+  octopus_configs:
+      topic: 'mma-GWwave-Triggers'
+      group_id: 'mma-GW-Livingston'
+  # grpc_configs:
+  #   server_uri: 141.142.253.167:6379
+  #   max_message_size: 104857600
+  #   use_ssl: False
+
