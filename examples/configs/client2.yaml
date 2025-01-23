@@ -8,12 +8,12 @@ generator_configs:
   #   lr: 0.01
   # Logging and outputs
   logging_id: "LIGO_Hanford"
-  logging_output_dirname: "./output"
+  logging_output_dirname: "./examples/output"
   logging_output_filename: "result"
 
 inference_configs:
   batch_size: 2
-  dataset_path: "/u/parthpatel7173/GW_VFL_data/Inference_data/Feb_Events/"
+  dataset_path: "/u/parthpatel7173/GW_VFL_data/Inference_data/Feb_Events/GW200129_065458_1264314069.hdf5"
   # noise_dir: "/scratch/bcbw/parthpatel7173/bbke_files/WaveNet_data/Gaussian_Noise/"
   length: None
 
@@ -38,8 +38,8 @@ model_configs:
 
 comm_configs:
   octopus_configs:
-      # topic: 'mma-GWwave-Triggers'
-      group_id: 'mma-GW-Livingston'
+      topic: 'mma-GWwave-Triggers'
+      group_id: 'mma-GW-Hanford'
 
   # grpc_configs:
   #   server_uri: 141.142.253.167:6379

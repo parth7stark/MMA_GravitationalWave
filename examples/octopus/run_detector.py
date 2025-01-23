@@ -56,6 +56,7 @@ client_agent.logger.info(f"[Detector {client_agent.get_id()}] ready for inferenc
 
 
 if client_agent.client_agent_config.train_configs.do_inference==False:
+    print("Fine-tuning workflow to be implemented")
     # Implement fine-tuning workflow using Octopus [TODO]
 
 else:

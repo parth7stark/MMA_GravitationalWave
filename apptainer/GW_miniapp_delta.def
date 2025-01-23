@@ -34,13 +34,16 @@ From: nvidia/cuda:11.8.0-cudnn8-runtime-ubuntu20.04
     # Install pip packages
     # Install VFL requirements.txt -- removed pytorch from it since we will install later
     pip3 install -r /app/requirements.txt
-    pip3 install h5py pytorch-lightning
+    # pip3 install h5py pytorch-lightning # taken care in setup.py
 
-    pip3 install -e /app
+    # Install setup.py libraries
+    # pip3 install -e /app
+    pip install -e ".[examples]"
+
 
     pip3 install torch==2.1.2 torchvision==0.16.2 torchaudio==2.1.2 --index-url https://download.pytorch.org/whl/cu118
-    pip3 install numpy==1.24.2    
-    pip3 install "diaspora-event-sdk[kafka-python]"
+    # pip3 install numpy==1.24.2    #added to requirements
+    # pip3 install "diaspora-event-sdk[kafka-python]"  # added to setup.py
 
     cd /app
 

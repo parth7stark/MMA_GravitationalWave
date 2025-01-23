@@ -8,7 +8,7 @@ generator_configs:
   #   lr: 0.01
   # Logging and outputs
   logging_id: "LIGO_Livingston"
-  logging_output_dirname: "./output"
+  logging_output_dirname: "./examples/output"
   logging_output_filename: "result"
 
 inference_configs:
@@ -38,7 +38,7 @@ model_configs:
 
 comm_configs:
   octopus_configs:
-      # topic: 'mma-GWwave-Triggers' 
+      topic: 'mma-GWwave-Triggers' 
       group_id: 'mma-GW-Livingston'
   # grpc_configs:
   #   server_uri: 141.142.253.167:6379

@@ -3,9 +3,9 @@ client_configs:
     # trainer: "GWTrainer"
     do_inference: True
   comm_configs:
-    octopus_configs:
+    # octopus_configs:
       # server tells client which topic to send embeddings to
-      topic: 'mma-GWwave-Triggers'
+      # topic: 'mma-GWwave-Triggers'
     compressor_configs:
       enable_compression: False
 
@@ -32,7 +32,7 @@ server_configs:
     # plot_epoch: 20
     # plot_file_path: "./output/loss.pdf"
   # num_global_epochs: 20
-  logging_output_dirname: "./output"
+  logging_output_dirname: "./examples/output"
   logging_output_filename: "result"
   model_configs:
     # model_path: "./model/GW_server_model.py"

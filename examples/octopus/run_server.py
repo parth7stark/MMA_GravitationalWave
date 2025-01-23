@@ -37,33 +37,48 @@ server_agent.logger.info("[Server] Listening for messages...")
 
 for msg in communicator.consumer:
     topic = msg.topic
-    data_str = msg.value.decode("utf-8")  # decode to string
-    data = json.loads(data_str)          # parse JSON to dict
+    try:
+        data_str = msg.value.decode("utf-8")  # decode to string
+        data = json.loads(data_str)          # parse JSON to dict
 
-    Event_type = data["EventType"]
+        Event_type = data["EventType"]
 
-    if Event_type == "SendEmbeddings":
-        communicator.handle_embeddings_message(data)
+        if Event_type == "SendEmbeddings":
+            communicator.handle_embeddings_message(data)
 
-    elif Event_type == "PostProcess":
-        communicator.handle_post_process_message(data)
+        elif Event_type == "PostProcess":
+            communicator.handle_post_process_message(data)
 
-    elif Event_type == "PotentialMerger":
-        # not triggering anything on server side
-        continue
+        elif Event_type == "PotentialMerger":
+            # not triggering anything on server side
+            continue
 
-    elif Event_type == "DetectorReady":  
-        # Detector connected and ready for inference
-        # not triggering anything on server side, just publishing event to octopus fabric
-        # Keep on listening other events
-        continue 
+        elif Event_type == "DetectorReady":  
+            # Detector connected and ready for inference
+            # not triggering anything on server side, just publishing event to octopus fabric
+            # Keep on listening other events
+            continue 
 
-        # Later we will keep track of connected detectors and check if anyone got disconnected
+            # Later we will keep track of connected detectors and check if anyone got disconnected
 
-    elif Event_type == "ServerStarted":
-        # Continue listening other events
-        continue
+        elif Event_type == "ServerStarted":
+            # Continue listening other events
+            continue
 
-    else:
-        print(f"[Server] Unknown Event Type in topic ({topic}): {Event_type}", flush=True)
-        server_agent.logger.info(f"[Server] Unknown Event Type in topic ({topic}): {Event_type}")
+        else:
+            print(f"[Server] Unknown Event Type in topic ({topic}): {Event_type}", flush=True)
+            server_agent.logger.info(f"[Server] Unknown Event Type in topic ({topic}): {Event_type}")
+
+    except json.JSONDecodeError as e:
+        # Handle invalid JSON messages
+        print(f"[Server] JSONDecodeError for message from topic ({topic}): {e}", flush=True)
+        server_agent.logger.error(f"[Server] JSONDecodeError for message from topic ({topic}): {e}")
+    
+    except Exception as e:
+        # Catch-all for other unexpected exceptions
+        """Octopus down and got a message which doesn't have 'EventType' key"""
+        print(f"[Server] Unexpected error while processing message from topic ({topic}): {e}", flush=True)
+        print(f"[Server] Raw message: {msg}", flush=True)
+
+        server_agent.logger.error(f"[Server] Unexpected error while processing message from topic ({topic}): {e}")
+        server_agent.logger.error(f"[Server] Raw message: {msg}")
