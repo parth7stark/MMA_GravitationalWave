@@ -10,7 +10,7 @@ import numpy as np
 from . import pysz
 from . import pyszx
 from copy import deepcopy
-from appfl.misc import deprecated
+from mma_gw.misc import deprecated
 from omegaconf import DictConfig
 from collections import OrderedDict
 from typing import Tuple, Union, List

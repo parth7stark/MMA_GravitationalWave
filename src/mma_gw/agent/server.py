@@ -127,7 +127,7 @@ class ServerAgent:
             from proxystore.connectors.redis import RedisConnector
             from proxystore.connectors.file import FileConnector
             from proxystore.connectors.endpoint import EndpointConnector
-            from appfl.communicator.connector import S3Connector
+            # from appfl.communicator.connector import S3Connector
             self.proxystore = Store(
                 'server-proxystore',
                 eval(self.server_agent_config.server_configs.comm_configs.proxystore_configs.connector_type)(

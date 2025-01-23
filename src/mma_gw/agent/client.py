@@ -117,7 +117,7 @@ class ClientAgent:
         If checkpoint file directory is provided in config then load the checkpoints/best weights
         """
 
-        model_configs =  self.client_agent_config.client_configs.model_configs
+        model_configs =  self.client_agent_config.model_configs
 
         self.model = ClientModel()
 
@@ -176,7 +176,7 @@ class ClientAgent:
             from proxystore.connectors.redis import RedisConnector
             from proxystore.connectors.file import FileConnector
             from proxystore.connectors.endpoint import EndpointConnector
-            from appfl.communicator.connector.s3 import S3Connector
+            # from appfl.communicator.connector.s3 import S3Connector
             self.proxystore = Store(
                 self.get_id(),
                 eval(self.client_agent_config.comm_configs.proxystore_configs.connector_type)(

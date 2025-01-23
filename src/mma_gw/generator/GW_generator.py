@@ -3,14 +3,14 @@ from typing import Tuple, Dict, Optional, Any
 from omegaconf import DictConfig
 
 
-class GWGenerator(BaseGGWGenerator):
+class GWGenerator():
     """
     GWGenerator:
         GGWGenerator for FL clients, which computes/generates the local embeddings using the given batch
     """  
     def __init__(
         self,
-        model: Optional[Module]=None,
+        model: torch.nn.Module=None,
         generator_configs: DictConfig = DictConfig({}),
         logger: Optional[Any]=None,
         **kwargs

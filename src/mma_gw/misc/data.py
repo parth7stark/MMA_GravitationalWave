@@ -7,7 +7,7 @@ import torch
 import pathlib
 import numpy as np
 import matplotlib.pyplot as plt
-from appfl.config import *
+from mma_gw.config import *
 from torch.utils import data
 from typing import List, Optional
 from .deprecation import deprecated

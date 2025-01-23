@@ -2,7 +2,7 @@ import torch
 from omegaconf import DictConfig
 from typing import Any, Union, List, Dict, Optional
 import numpy as np
-from GW_aggregator_utils import *
+from .GW_aggregator_utils import *
 
 
 class GWAggregator():
