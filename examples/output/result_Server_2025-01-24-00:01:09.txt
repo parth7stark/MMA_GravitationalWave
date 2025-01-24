@@ -1,0 +1,3 @@
+[2025-01-24 00:01:09,022 INFO server]: Logging to /scratch/bcbw/parthpatel7173/MMA_GravitationalWave/examples/output/result_Server_2025-01-24-00:01:09.txt
+[2025-01-24 00:01:10,510 INFO server]: [Server] Published ServerStarted event with config.
+[2025-01-24 00:01:10,511 INFO server]: [Server] Listening for messages...

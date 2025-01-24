@@ -1,0 +1,52 @@
+client_configs:
+  generator_configs:
+    do_inference: True
+    # trainer: "GWTrainer"
+  comm_configs:
+    # octopus_configs:
+      # server tells client which topic to send embeddings to
+      # topic: 'mma-GWwave-Triggers'
+    compressor_configs:
+      enable_compression: False
+
+server_configs:
+  # scheduler: "SyncScheduler"
+  # scheduler_kwargs:
+  #   num_clients: 2
+  # aggregator: "GWAggregator"
+  aggregator_kwargs:
+    device: "cpu"
+    post_process_configs:
+      width: 2000
+      threshold: 0.99
+    # optim: Adam
+    # optim_args:
+    #   lr: 0.01
+    # loss_fn: BCELoss
+    # server_label_path: "./dataset/GW_server_labels.py"
+    # server_label_fn: get_labels
+    # server_label_fn_kwargs:
+    #   dataset_dir: "/u/parthpatel7173/GW_VFL_data"
+    # validation: True
+    # validation_interval: 1
+    # plot_epoch: 20
+    # plot_file_path: "./output/loss.pdf"
+  # num_global_epochs: 20
+  logging_output_dirname: "/scratch/bcbw/parthpatel7173/MMA_GravitationalWave/examples/output"
+  logging_output_filename: "result"
+  model_configs:
+    # model_path: "./model/GW_server_model.py"
+    # model_name: "ServerModel"
+    checkpoint_dir: "/u/parthpatel7173/GW_VFL_data/2channel_ckpts"
+  
+  # define server side kafka parameters here like consumer settings (offset policy)
+  comm_configs:
+    octopus_configs:
+      topic: 'mma-GWwave-Triggers'
+      group_id: 'mma-GW-server'
+
+    # grpc_configs:
+    #   server_uri: localhost:50051
+    #   max_message_size: 104857600
+    #   use_ssl: False
+
