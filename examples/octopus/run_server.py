@@ -3,7 +3,7 @@ from omegaconf import OmegaConf
 from mma_gw.agent import ServerAgent
 from mma_gw.communicator.octopus import OctopusServerCommunicator
 import json
-
+import traceback
 
 argparser = argparse.ArgumentParser()
 argparser.add_argument(
@@ -76,9 +76,15 @@ for msg in communicator.consumer:
     
     except Exception as e:
         # Catch-all for other unexpected exceptions
-        """Octopus down and got a message which doesn't have 'EventType' key"""
+        """Octopus down or got a message which doesn't have 'EventType' key"""
+        
+        # Log the traceback
+        tb = traceback.format_exc()
+
         print(f"[Server] Unexpected error while processing message from topic ({topic}): {e}", flush=True)
         print(f"[Server] Raw message: {msg}", flush=True)
+        print(f"[Server] Traceback: {tb}", flush=True)
 
         server_agent.logger.error(f"[Server] Unexpected error while processing message from topic ({topic}): {e}")
         server_agent.logger.error(f"[Server] Raw message: {msg}")
+        server_agent.logger.error(f"[Server] Traceback: {tb}")
