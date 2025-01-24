@@ -3,7 +3,7 @@ from omegaconf import DictConfig
 from typing import Any, Union, List, Dict, Optional
 import numpy as np
 from .GW_aggregator_utils import *
-
+from lal import gpstime
 
 class GWAggregator():
     """
@@ -108,18 +108,24 @@ class GWAggregator():
             else:
                 self.predictions_5[batch_id]=(outputs.detach().cpu().numpy())
 
-    def process_post_process_message(self, det_id, status):
-
+    def process_post_process_message(self, producer, topic, det_id, status, GPS_start_time):
+        """
+        Handle "PostProcess" messages. Wait until all clients are done.
+        """    
         if status == "DONE" and det_id is not None:
             print(f"[Server] Received DONE from detector {det_id}")
+            self.logger.info(f"[Server] Received DONE from detector {det_id}")
+
+            # Add the client to the completed set
             self.completed_clients.add(det_id)
 
+            # Check if all expected clients are done
             if self.completed_clients == self.expected_clients:
                 print("[Server] All detectors are DONE. Invoking post_process...")
-                triggers = self.post_process()
-                return triggers
-    
-    def post_process(self):
+                self.logger.info("[Server] All detectors are DONE. Invoking post_process...")
+                self.post_process(producer, topic, GPS_start_time)
+
+    def post_process(self, producer, topic, GPS_start_time):
         """
         Once both detectors are done, we gather predictions in ascending order of batch_id.
         """
@@ -147,5 +153,66 @@ class GWAggregator():
         threshold = self.aggregator_configs.post_process_configs.threshold
 
         triggers = get_triggers(preds_0, preds_5, width, threshold, truncation=0, window_shift=2048)
+       
+        """
+        triggers is a dictionary of format
+        triggers = {
+            'detection': [comma separated time list]
+        }
+
+        When multiple datasets given, triggers is dictionary keyed on dataset name
+        Dataset Triggers =
+        {
+            GW200129: [{'detection': [1925.3505859375]}]
+            GW200219: [{'detection': []}]
+            GW200208: [{'detection': [812.976806640625, 932.83935546875, 1483.5166015625, 1162.1025390625, 2237.10302734375, 3679.439208984375]}]
+        }
+
+        """
+
+        # Check if we have any detection
+        if 'detection' in triggers and triggers['detection']:
+            print(f"triggers: {triggers}" , flush=True)
+            self.logger.info(f"triggers: {triggers}")
+
+            # If we have detection, send merger details to Octopus
+            self.publish_detection_details(producer, topic, triggers, GPS_start_time)
+        else:
+            # Log that triggers are either empty
+            print(f"No detection triggers yet", flush=True)
+            self.logger.info("No detection triggers yet")
+                
+
+    def publish_detection_details(self, producer, topic, triggers, GPS_start_time):
+       
+        # Compute GPS detection times
+        gps_detection_times = [GPS_start_time + t for t in triggers['detection']]
+        print(f"GPS start time: {GPS_start_time}", flush=True)
+        self.logger.info(f"GPS start time: {GPS_start_time}")
+
+
+        # Convert GPS detection times to UTC times
+        utc_detection_times = [gpstime.gps_to_utc(gps_time) for gps_time in gps_detection_times]
+
+        # Prepare data to send to Kafka
+        detection_details = []
+        for gps_time, utc_time in zip(gps_detection_times, utc_detection_times):
+            print(f"GPS Time: {gps_time} -> UTC Time: {utc_time}", flush=True)
+            self.logger.info(f"GPS Time: {gps_time} -> UTC Time: {utc_time}")
+            
+            detection_detail = {
+                "GPS_time": gps_time,
+                "UTC_time": utc_time.strftime("%Y-%m-%d %H:%M:%S")
+            }
+            detection_details.append(detection_detail)
+
+        # Send detection details to Kafka
+        producer.send(topic, value={
         
-        return triggers
+            "EventType": "PotentialMerger",
+            "detection_details": detection_details
+        })
+        producer.flush()
+        
+        print("[Server] Published PotentialMerger event with GPS time.", flush=True)
+        self.logger.info("[Server] Published PotentialMerger event with GPS time.")

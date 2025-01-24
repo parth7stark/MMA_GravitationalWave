@@ -6,7 +6,6 @@ from proxystore.proxy import extract
 from mma_gw.agent import ServerAgent
 from mma_gw.logger import ServerAgentFileLogger
 from .utils import serialize_tensor_to_base64, deserialize_tensor_from_base64
-from lal import gpstime
 
 from diaspora_event_sdk import KafkaProducer, KafkaConsumer
 
@@ -95,68 +94,7 @@ class OctopusServerCommunicator:
         status = data["status"]
         GPS_start_time = data["GPS_start_time"]
 
-        triggers = self.server_agent.aggregator.process_post_process_message(det_id, status, GPS_start_time)
-    
-        """
-        triggers is a dictionary of format
-        triggers = {
-            'detection': [comma separated time list]
-        }
-
-        When multiple datasets given, triggers is dictionary keyed on dataset name
-        Dataset Triggers =
-        {
-            GW200129: [{'detection': [1925.3505859375]}]
-            GW200219: [{'detection': []}]
-            GW200208: [{'detection': [812.976806640625, 932.83935546875, 1483.5166015625, 1162.1025390625, 2237.10302734375, 3679.439208984375]}]
-        }
-
-        """
-
-        # Check if we have any detection
-        if 'detection' in triggers and triggers['detection']:
-            print(f"triggers: {triggers}" , flush=True)
-            self.logger.info(f"triggers: {triggers}")
-
-            # If we have detection, send merger details to Octopus
-            self.publish_detection_details(triggers, GPS_start_time)
-
-            
-
-    def publish_detection_details(self, triggers, GPS_start_time):
-       
-        # Compute GPS detection times
-        gps_detection_times = [GPS_start_time + t for t in triggers['detection']]
-        print(f"GPS start time: {GPS_start_time}", flush=True)
-        self.logger.info(f"GPS start time: {GPS_start_time}")
-
-
-        # Convert GPS detection times to UTC times
-        utc_detection_times = [gpstime.gps_to_utc(gps_time) for gps_time in gps_detection_times]
-
-        # Prepare data to send to Kafka
-        detection_details = []
-        for gps_time, utc_time in zip(gps_detection_times, utc_detection_times):
-            print(f"GPS Time: {gps_time} -> UTC Time: {utc_time}", flush=True)
-            self.logger.info(f"GPS Time: {gps_time} -> UTC Time: {utc_time}")
-            
-            detection_detail = {
-                "GPS_time": gps_time,
-                "UTC_time": utc_time.strftime("%Y-%m-%d %H:%M:%S")
-            }
-            detection_details.append(detection_detail)
-
-        # Send detection details to Kafka
-        self.producer.send(self.topic, value={
-        
-            "EventType": "PotentialMerger",
-            "detection_details": detection_details
-        })
-        self.producer.flush()
-        
-        print("[Server] Published PotentialMerger event with GPS time.", flush=True)
-        self.logger.info("[Server] Published PotentialMerger event with GPS time.")
-
+        self.server_agent.aggregator.process_post_process_message(self.producer, self.topic, det_id, status, GPS_start_time)
 
     def _default_logger(self):
         """Create a default logger for the server if no logger provided."""
