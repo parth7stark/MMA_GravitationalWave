@@ -55,7 +55,7 @@ client_agent.logger.info(f"[Detector {client_agent.get_id()}] ready for inferenc
 
 
 
-if client_agent.client_agent_config.train_configs.do_inference==False:
+if client_agent.client_agent_config.generator_configs.do_inference==False:
     print("Fine-tuning workflow to be implemented")
     # Implement fine-tuning workflow using Octopus [TODO]
 
@@ -112,6 +112,8 @@ else:
         [ 6.2329,  6.2519,  6.2359,  ...,  6.8050,  6.2759,  5.6775],
         [ 5.3650,  5.1982,  5.2022,  ...,  9.6494,  8.9188,  7.9569],
         ...,
+
+        (batchsize, 4096, 16) *4 bytes -- float32 type tensor
 
        """
 

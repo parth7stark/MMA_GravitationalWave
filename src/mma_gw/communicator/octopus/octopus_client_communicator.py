@@ -37,10 +37,10 @@ class OctopusClientCommunicator:
 
 
         client_group_id = self.client_agent.client_agent_config.comm_configs.octopus_configs.group_id
-        
         self.consumer = KafkaConsumer(
             self.topic,
             enable_auto_commit=True,
+            auto_offset_reset="earliest",  # This ensures it reads all past messages
             group_id=client_group_id
         )
 
@@ -127,8 +127,8 @@ class OctopusClientCommunicator:
             value=done_msg
         )
         
-        print(f"[Detector {client_id}] Publish PostProcess Event: GPS start time={GPSStartTime}", flush=True)
-        self.logger.info(f"[Detector {client_id}] Publish PostProcess Event: GPS start time={GPSStartTime}")
+        print(f"[Detector {detector_id}] Publish PostProcess Event: GPS start time={GPSStartTime}", flush=True)
+        self.logger.info(f"[Detector {detector_id}] Publish PostProcess Event: GPS start time={GPSStartTime}")
 
         self.producer.flush()
         

@@ -36,7 +36,9 @@ class ClientAgent:
     def load_config(self, config: DictConfig) -> None:
         """Load additional configurations provided by the server."""
         self.client_agent_config = OmegaConf.merge(self.client_agent_config, config)
+        # Initialize again so that they get updated configs
         self._load_model()
+        self._load_generator()
         self._load_compressor()
 
     def get_id(self) -> str:

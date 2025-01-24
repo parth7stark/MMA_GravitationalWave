@@ -1,7 +1,7 @@
 client_configs:
   generator_configs:
-    # trainer: "GWTrainer"
     do_inference: True
+    # trainer: "GWTrainer"
   comm_configs:
     # octopus_configs:
       # server tells client which topic to send embeddings to
