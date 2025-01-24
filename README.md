@@ -7,8 +7,7 @@ This repo specifically contains files and code related to **gravitational wave d
 
 ## Installation and running your first inference
 
-You will need a machine running Linux, MMA_GW does not support other
-operating systems.
+You will need a machine running Linux x86 architecture to build container image. If using ARM64 or other architecture, one need to update Apptainer definition file accordingly
 
 Please follow these steps:
 
