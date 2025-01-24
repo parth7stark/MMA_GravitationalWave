@@ -45,7 +45,7 @@ Please follow these steps:
 
     To allow the server and detectors to connect to the Octopus event fabric, you need to export the username (user's OpenID) and password (AWS secret key) in the .bashrc file for all sites where the components will run.
 
-    * **Note: You must configure the .bashrc file for all sites where the Kafka server, clients, or detectors are running.
+    * **Note:** You must configure the .bashrc file for all sites where the Kafka server, clients, or detectors are running.
 
     You can append these lines to the end of the .bashrc file using the following command:
 
@@ -67,30 +67,32 @@ Please follow these steps:
 5. Start Server for Inference
 
 
-   * Update the config file
+   * Update the config file:
 
-    Open the `examples/configs/FLserver.yaml` configuration file and update the following paths with the appropriate ones for your system:
+        Open the `examples/configs/FLserver.yaml` configuration file and update the following paths with the appropriate ones for your system:
 
-    - **Checkpoint Path**: Specify the location of the downloaded model checkpoint file.
+        - **Checkpoint Path:** Specify the location of the downloaded model checkpoint file.
 
-    - **Logging Output Path**: Define where the inference logs should be saved.
+        - **Logging Output Path:** Define where the inference logs should be saved.
 
 
-   * Update the Job script 
-   The sample job script can be located in the repository under the name `job_scripts/FL_Server.sh`
+   * Update the Job script:
+      
+       The sample job script can be located in the repository under the name `job_scripts/FL_Server.sh`
 
-    ```bash
-    job_scripts/FL_Server.sh
+        ```bash
+        job_scripts/FL_Server.sh
+    
+        - Modify the SLURM parameters in the script to suit your computing environment (e.g., partition, time, and resources).
+        ```
 
-    - Modify the SLURM parameters in the script to suit your computing environment (e.g., partition, time, and resources).
-    ```
-
-  * Submit the Job Script
-    Use the following command to submit the job script:
-
-    ```bash
-    sbatch job_scripts/FL_Server.sh
-    ```
+    * Submit the Job Script
+    
+        Use the following command to submit the job script:
+    
+        ```bash
+        sbatch job_scripts/FL_Server.sh
+        ```
 
     Submitting the job script will automatically start the Server.
 
@@ -100,34 +102,35 @@ Please follow these steps:
 
    * Update the config file
 
-    Open the `examples/configs/detector0.yaml` and  `examples/configs/detector1.yaml`configuration file and update the following paths with the appropriate ones for your system:
+        Open the `examples/configs/detector0.yaml` and  `examples/configs/detector1.yaml`configuration file and update the following paths with the appropriate ones for your system:
 
-    - **Checkpoint Path**: Specify the location of the downloaded model checkpoint file.
-    - **Inference Dataset Path**: Provide the path to the downloaded inference dataset file.
-    - **Logging Output Path**: Define where the inference logs should be saved.
-
+        - **Checkpoint Path**: Specify the location of the downloaded model checkpoint file.
+        - **Inference Dataset Path**: Provide the path to the downloaded inference dataset file.
+        - **Logging Output Path**: Define where the inference logs should be saved.
+    
 
    * Update the Job script 
-   The sample job script can be located in the repository under the name `job_scripts/FL_DetectorX.sh`
+   
+       The sample job script can be located in the repository under the name `job_scripts/FL_DetectorX.sh`
+    
+        ```bash
+        job_scripts/FL_DetectorX.sh
+    
+        - Modify the SLURM parameters in the script to suit your computing environment (e.g., partition, time, and resources).
+        ```
 
-    ```bash
-    job_scripts/FL_DetectorX.sh
-
-    - Modify the SLURM parameters in the script to suit your computing environment (e.g., partition, time, and resources).
-    ```
-
-  * Submit the Job Script
-    Use the following command to submit the job script:
-
-    ```bash
-    sbatch job_scripts/FL_DetectorX.sh
-    ```
+   * Submit the Job Script
+        Use the following command to submit the job script:
+    
+        ```bash
+        sbatch job_scripts/FL_DetectorX.sh
+        ```
 
     Submitting the job script will automatically start the Detectors.
 
 
-7.  Once the run is started, you'll find two output files per client and server named “<job-name>-err-<job_id>.log” and "<job-name>-out-<job_id>.log” in your working directory, Additionally, the job's output files will be stored in the log output directory that you specified in your config file.
-
+7.  Once the run begins, two output files will be generated for each client and server in your working directory: 
+`<job-name>-err-<job_id>.log` (error logs) and `<job-name>-out-<job_id>.log` (output logs). Additionally, the job's output files will be saved in the log output directory specified in your configuration file.
 
 
 ## Todo List and Project Plan
