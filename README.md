@@ -7,7 +7,7 @@ This repo specifically contains files and code related to **gravitational wave d
 
 ## Installation and running your first inference
 
-You will need a machine running Linux x86 architecture to build container image. If using ARM64 or other architecture, one need to update Apptainer definition file accordingly
+You will need a machine running Linux x86 architecture to build container image. If using ARM64 or other architecture, one need to update Apptainer definition file accordingly. Refer [Usage on Delta AI section](##usage-on-delta-ai)
 
 Please follow these steps:
 
