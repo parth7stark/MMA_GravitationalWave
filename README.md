@@ -25,14 +25,8 @@ Please follow these steps:
 
     ```bash
     https://drive.google.com/file/d/1zuNzPzHGlk0e5cUCDDPkZjZ5v81J-rhS/view?usp=drive_link
-    Unzip the file in <DATASET_DIR>
+    Unzip the file in <REPO_DIR>
     ```
-
-    *   **Note: The dataset directory `<DATASET_DIR>` should *not* be a
-        subdirectory in the MMA_GravitationalWave repository directory.** If it is, the
-        Apptainer build will be slow as the large databases will be copied into the
-        Apptainer build context.
-
 
 3. Build the Apptainer image:
 
@@ -130,6 +124,66 @@ Please follow these steps:
 
 7.  Once the run begins, two output files will be generated for each client and server in your working directory: 
 `<job-name>-err-<job_id>.log` (error logs) and `<job-name>-out-<job_id>.log` (output logs). Additionally, the job's output files will be saved in the log output directory specified in your configuration file.
+
+## Usage on Polaris
+Polaris compute nodes do not have network access to the event fabric's port. Therefore, an HTTPS proxy is required. While this will be set up in the future, as a workaround, you can run the server or detector on the **login node**.
+
+Modification to above usage steps:
+
+**Step 1:** Clone repo (no change)
+
+**Step 2:** Download dataset and checkpoints (no change)
+
+**Step 3:** Build the Apptainer image:
+
+    * Apptainer Setup
+
+    Polaris employs **Apptainer** for container management. To set up Apptainer, run:
+
+    ```bash
+    ml use /soft/modulefiles
+    ml load spack-pe-base/0.8.1
+    ml load apptainer
+    ml load e2fsprogs
+    apptainer version #1.2.2
+    ```
+
+    * Build the Apptainer image:
+
+    ```bash
+    apptainer build MMA_GW_Inference_miniapp.sif apptainer/MMA_GW_Inference_miniapp.def
+    ```
+
+
+**Step 4:** Update configurations
+
+Update the configurations for the server and detectors as described in the previous steps. Ensure the paths in the config files point to the appropriate locations on your system.
+
+**Step 5:** Start container on login node
+
+To start the server or detectors, execute the following commands from the login node.
+
+    * To start server, run:
+
+    ```bash
+    apptainer exec --nv \
+    MMA_GW_Inference_miniapp.sif \
+    python /app/examples/octopus/run_server.py --config <absolute path to FL server config file>/FLserver.yaml
+    ```
+
+    * To start Detector X, run:
+
+    ```bash
+    apptainer exec --nv \
+    MMA_GW_Inference_miniapp.sif \
+    python /app/examples/octopus/run_detector.py --config <absolute path to FL detectorX config file>/detectorX.yaml
+    ```
+
+## Usage on Delta AI
+
+Since Delta AI is an **ARM64 architecture machine**, so the Apptainer definition file must be updated to use a base image and install libraries compatible with the ARM64 architecture.
+
+The remaining steps are the same as those for Delta or Linux x86 architecture.
 
 
 ## Todo List and Project Plan

@@ -25,7 +25,7 @@
 #SBATCH --mail-type="BEGIN,END" # See sbatch or srun man pages for more email options
 
 
-
+# Load necessary modules
 source /sw/external/python/anaconda3_gpu/etc/profile.d/conda.sh
 conda deactivate
 conda deactivate  # just making sure
@@ -36,7 +36,7 @@ module load anaconda3_gpu
 module list
 
 # Change directory to the cloned repo
-cd /scratch/bcbw/parthpatel7173/MMA_GravitationalWave
+cd <path to cloned repo>
 
 apptainer exec --nv \
   MMA_GW_Inference_miniapp.sif \
