@@ -125,7 +125,16 @@ Please follow these steps:
 7.  Once the run begins, two output files will be generated for each client and server in your working directory: 
 `<job-name>-err-<job_id>.log` (error logs) and `<job-name>-out-<job_id>.log` (output logs). Additionally, the job's output files will be saved in the log output directory specified in your configuration file.
 
+## Usage on Delta AI
+
+Since Delta AI is an **ARM64 architecture machine**, so the Apptainer definition file must be updated to use a base image and install libraries compatible with the ARM64 architecture.
+
+Just use the `MMA_GW_Inference_miniapp_arm64.def` for building the image.
+The remaining steps are the same as those for Delta or Linux x86 architecture.
+
+
 ## Usage on Polaris
+
 Polaris compute nodes do not have network access to the event fabric's port. Therefore, an HTTPS proxy is required. While this will be set up in the future, as a workaround, you can run the server or detector on the **login node**.
 
 Modification to above usage steps:
@@ -136,22 +145,35 @@ Modification to above usage steps:
 
 **Step 3:** Build the Apptainer image:
 
-    * Apptainer Setup
+To build the Apptainer images, you need to be on the Polaris compute nodes. Follow these steps:
 
-    Polaris employs **Apptainer** for container management. To set up Apptainer, run:
+1. **Start an Interactive Session:**
+   ```bash
+   qsub -I -A <Project> -q debug -l select=1 -l walltime=01:00:00 -l filesystems=home:eagle -l singularity_fakeroot=true
+   ```
 
+2. **Set Proxy Environment Variables:**
+
+   ```bash
+   export HTTP_PROXY=http://proxy.alcf.anl.gov:3128
+   export HTTPS_PROXY=http://proxy.alcf.anl.gov:3128
+   export http_proxy=http://proxy.alcf.anl.gov:3128
+   export https_proxy=http://proxy.alcf.anl.gov:3128
+   ```
+
+3. **Load Apptainer Module:**
+
+   ```bash
+   ml use /soft/modulefiles
+   ml load spack-pe-base/0.8.1
+   ml load apptainer
+   ml load e2fsprogs
+   ```
+
+4. **Build Apptainer Images:**
+   
     ```bash
-    ml use /soft/modulefiles
-    ml load spack-pe-base/0.8.1
-    ml load apptainer
-    ml load e2fsprogs
-    apptainer version #1.2.2
-    ```
-
-    * Build the Apptainer image:
-
-    ```bash
-    apptainer build MMA_GW_Inference_miniapp.sif apptainer/MMA_GW_Inference_miniapp.def
+    apptainer build --fakeroot MMA_GW_Inference_miniapp.sif apptainer/MMA_GW_Inference_miniapp.def
     ```
 
 
@@ -178,13 +200,7 @@ To start the server or detectors, execute the following commands from the login 
     MMA_GW_Inference_miniapp.sif \
     python /app/examples/octopus/run_detector.py --config <absolute path to FL detectorX config file>/detectorX.yaml
     ```
-
-## Usage on Delta AI
-
-Since Delta AI is an **ARM64 architecture machine**, so the Apptainer definition file must be updated to use a base image and install libraries compatible with the ARM64 architecture.
-
-The remaining steps are the same as those for Delta or Linux x86 architecture.
-
+    
 
 ## Todo List and Project Plan
 Please refer to our Box folder for the latest project tasks and roadmap: [Link](https://www.overleaf.com/project/66bce960bfb79d8b86fcfdf3)
