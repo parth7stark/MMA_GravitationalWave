@@ -69,19 +69,21 @@ class ClientAgent:
             metadata = None
         if self.enable_compression:
             params = self.compressor.compress_model(params)
-        return self.proxy(params)[0] if metadata is None else (self.proxy(params)[0], metadata)
+        return params if metadata is None else (params, metadata)
+        
+        # return self.proxy(params)[0] if metadata is None else (self.proxy(params)[0], metadata)
     
 
-    def proxy(self, obj):
-        """
-        Create the proxy of the object.
-        :param obj: the object to be proxied.
-        :return: the proxied object and a boolean value indicating whether the object is proxied.
-        """
-        if self.enable_proxystore:
-            return self.proxystore.proxy(obj), True
-        else:
-            return obj, False
+    # def proxy(self, obj):
+    #     """
+    #     Create the proxy of the object.
+    #     :param obj: the object to be proxied.
+    #     :return: the proxied object and a boolean value indicating whether the object is proxied.
+    #     """
+    #     if self.enable_proxystore:
+    #         return self.proxystore.proxy(obj), True
+    #     else:
+    #         return obj, False
         
     def clean_up(self) -> None:
         """Clean up the client agent."""
@@ -163,28 +165,50 @@ class ClientAgent:
 
     def _load_proxystore(self) -> None:
         """
-        Create the proxystore for storing and sending the model parameters from the client to the server.
+        Create the proxystore for storing and sending the model embeddings from the detectors to the server.
         """
         if hasattr(self, "proxystore") and self.proxystore is not None:
             return
         self.proxystore = None
-        self.enable_proxystore = False
+        self.use_proxystore = False
         if not hasattr(self.client_agent_config, "comm_configs"):
             return
         if not hasattr(self.client_agent_config.comm_configs, "proxystore_configs"):
             return
         if getattr(self.client_agent_config.comm_configs.proxystore_configs, "enable_proxystore", False):
-            self.enable_proxystore = True
-            from proxystore.connectors.redis import RedisConnector
-            from proxystore.connectors.file import FileConnector
-            from proxystore.connectors.endpoint import EndpointConnector
-            # from appfl.communicator.connector.s3 import S3Connector
+            self.use_proxystore = True
             self.proxystore = Store(
-                self.get_id(),
-                eval(self.client_agent_config.comm_configs.proxystore_configs.connector_type)(
-                    **self.client_agent_config.comm_configs.proxystore_configs.connector_configs
+                name="mma-gw-proxystore",
+                connector=self.get_proxystore_connector(
+                    self.client_agent_config.comm_configs.proxystore_configs.connector_type,
+                    self.client_agent_config.comm_configs.proxystore_configs.connector_configs,
                 ),
             )
+            self.logger.info(
+                f"Detector using proxystore for model embeddings transfer with store: {self.client_agent_config.comm_configs.proxystore_configs.connector_type}."
+            )
+
+
+    def get_proxystore_connector(self,
+        connector_name,
+        connector_args,
+    ):
+        assert connector_name in ["RedisConnector", "FileConnector", "EndpointConnector"], (
+            f"Invalid connector name: {connector_name}, only RedisConnector, FileConnector, and EndpointConnector are supported"
+        )
+        if connector_name == "RedisConnector":
+            from proxystore.connectors.redis import RedisConnector
+
+            connector = RedisConnector(**connector_args)
+        elif connector_name == "FileConnector":
+            from proxystore.connectors.file import FileConnector
+
+            connector = FileConnector(**connector_args)
+        elif connector_name == "EndpointConnector":
+            from proxystore.connectors.endpoint import EndpointConnector
+
+            connector = EndpointConnector(**connector_args)
+        return connector
 
     def load_inference_data(self, dataset_file) -> None:
         """Get local strain data for Inference."""

@@ -7,7 +7,7 @@ generator_configs:
   logging_output_filename: "result"
 
 inference_configs:
-  batch_size: 2
+  batch_size: 8
   dataset_path: "<absolute path to downloaded data directory>/Inference_dataset/GW200129_065458_1264314069.hdf5"
   length: None
 
@@ -18,3 +18,13 @@ comm_configs:
   octopus_configs:
       topic: 'MMA_GW_Events_shared'
       group_id: 'mma-GW-Hanford'
+  proxystore_configs:
+      enable_proxystore: True
+      connector_type: "EndpointConnector"
+      connector_configs:
+        endpoints: ["48ce2ca5-26dc-4b4b-9066-4150e595b5a7","c7b0e638-2284-420a-83e7-c9d007881a60"]
+        #detector2 endpoint, server endpoint
+
+      # connector_type: "FileConnector"
+      # connector_configs:
+      #   store_dir: "/scratch/bcbw/parthpatel7173/proxystore"

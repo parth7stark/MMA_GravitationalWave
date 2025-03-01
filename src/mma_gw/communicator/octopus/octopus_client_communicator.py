@@ -81,6 +81,9 @@ class OctopusClientCommunicator:
         else:
             client_id = str(self.client_id)
         
+        if self.client_agent.use_proxystore:
+            local_embeddings = self.client_agent.proxystore.proxy(local_embeddings)
+
         # Serialize to base64
         embedding_b64 = serialize_tensor_to_base64(local_embeddings)
 

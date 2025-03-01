@@ -8,6 +8,7 @@ from mma_gw.logger import ServerAgentFileLogger
 from .utils import serialize_tensor_to_base64, deserialize_tensor_from_base64
 
 from diaspora_event_sdk import KafkaProducer, KafkaConsumer
+from proxystore.proxy import Proxy, extract
 
 class OctopusServerCommunicator:
     """
@@ -80,6 +81,9 @@ class OctopusServerCommunicator:
         # Extract and deserialize the embedding
         embedding_b64 = data["embedding"]
         local_embedding = deserialize_tensor_from_base64(embedding_b64)
+
+        if isinstance(local_embedding, Proxy):
+            local_embedding = extract(local_embedding)
 
         self.server_agent.aggregator.process_embeddings_message(batch_id, shift, det_id, local_embedding)
     
