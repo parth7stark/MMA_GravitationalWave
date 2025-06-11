@@ -225,13 +225,10 @@ class ClientAgent:
 
             endpoints = connector_args.pop("endpoints")
             for i, e in enumerate(endpoints):
-                print(f"***[CLIENT] {e} {os.getenv(e)}***")
                 if "PROXYSTORE" in e:
                     endpoints[i] = os.getenv(e, e)
 
             connector_args["endpoints"] = endpoints
-            print(connector_args)
-
             connector = EndpointConnector(**connector_args)
         return connector
 
