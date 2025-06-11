@@ -1,31 +1,30 @@
-client_id: '0'
+client_id: "0"
 generator_configs:
   # Device to use: cpu or cuda
   device: "cpu"
   logging_id: "LIGO_Livingston"
-  logging_output_dirname: "<absolute path to repo>/examples/output"
+  logging_output_dirname: "/app/examples/output"
   logging_output_filename: "result"
 
 inference_configs:
   batch_size: 8
-  dataset_path: "<absolute path to downloaded data directory>/Inference_dataset/GW200129_065458_1264314069.hdf5"
+  dataset_path: "/app/MMA_GravitationalWave_Data/Inference_dataset/GW200129_065458_1264314069.hdf5"
   length: None
 
 model_configs:
-  checkpoint_dir: "<absolute path to downloaded data directory>/2channel_ckpts/detector_1_sub_mod_A.ckpt"
+  checkpoint_dir: "/app/MMA_GravitationalWave_Data/2channel_ckpts/detector_1_sub_mod_A.ckpt"
 
 comm_configs:
   octopus_configs:
-      topic: 'MMA_GW_Events_shared' 
-      group_id: 'mma-GW-Livingston'
+    topic: "MMA_GW_Events_shared"
+    group_id: "mma-GW-Livingston"
   proxystore_configs:
-      enable_proxystore: True
-      connector_type: "EndpointConnector"
-      connector_configs:
-        endpoints: ["b9161509-0af5-4f5b-8541-75550afa95bd","c7b0e638-2284-420a-83e7-c9d007881a60"]
-        #detector1 endpoint, server endpoint
-        
-      # connector_type: "FileConnector"
-      # connector_configs:
-      #   store_dir: "/scratch/bcbw/parthpatel7173/proxystore"
-      
+    enable_proxystore: True
+    connector_type: "EndpointConnector"
+    connector_configs:
+      endpoints: ["PROXYSTORE_SERVER_ENDPOINT", "PROXYSTORE_DETECTOR_ENDPOINT"]
+      #detector1 endpoint, server endpoint
+
+    # connector_type: "FileConnector"
+    # connector_configs:
+    #   store_dir: "/scratch/bcbw/parthpatel7173/proxystore"

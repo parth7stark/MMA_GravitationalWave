@@ -14,14 +14,14 @@ server_configs:
       width: 2000
       threshold: 0.99
 
-  logging_output_dirname: "<absolute path to repo>/examples/output"
+  logging_output_dirname: "/app/examples/output"
   logging_output_filename: "result"
-  
+
   model_configs:
-    checkpoint_dir: "<absolute path to downloaded data directory>/2channel_ckpts"
-  
+    checkpoint_dir: "/app/MMA_GravitationalWave_Data/2channel_ckpts"
+
   # define server side kafka parameters here like consumer settings (offset policy)
   comm_configs:
     octopus_configs:
-      topic: 'MMA_GW_Events_shared'
-      group_id: 'mma-GW-server'
+      topic: "MMA_GW_Events_shared"
+      group_id: "mma-GW-server"
