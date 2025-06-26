@@ -24,7 +24,12 @@ Please follow these steps:
         up full database. 
 
     ```bash
+    Download the pre-trained model checkpoint for BBH signal detection along with the corresponding strain data
     https://drive.google.com/file/d/1zuNzPzHGlk0e5cUCDDPkZjZ5v81J-rhS/view?usp=drive_link
+
+    Download the pre-trained model checkpoint for GW170817 signal detection along with the corresponding strain data
+    https://drive.google.com/file/d/1pNtK-8QACb1tgkspLWXlWogGKIcp_8oT/view?usp=sharing
+    
     Unzip the file in <REPO_DIR>
     ```
 
