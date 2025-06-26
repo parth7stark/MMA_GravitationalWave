@@ -9,10 +9,10 @@ client_configs:
 server_configs:
   aggregator_kwargs:
     # Device to use: cpu or cuda
-    device: "cpu"
+    device: "cuda"
     post_process_configs:
-      width: 2000
-      threshold: 0.99
+      width: 1000
+      threshold: 0.9
 
   logging_output_dirname: "<absolute path to repo>/examples/output"
   logging_output_filename: "result"

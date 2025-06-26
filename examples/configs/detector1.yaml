@@ -8,7 +8,7 @@ generator_configs:
 
 inference_configs:
   batch_size: 8
-  dataset_path: "<absolute path to downloaded data directory>/Inference_dataset/GW200129_065458_1264314069.hdf5"
+  dataset_path: "<absolute path to downloaded data directory>/Inference_dataset/truncated_whitened_strains_GW170817_1187006834_tukey.hdf5"
   length: None
 
 model_configs:

@@ -38,6 +38,9 @@ module list
 # Change directory to the cloned repo
 cd <path to cloned repo>
 
+# Start proxystore endpoint on the node (compute/login) where Hanford detector will run
+#proxystore-endpoint start mma_gw_detector1
+
 apptainer exec --nv \
   MMA_GW_Inference_miniapp.sif \
   python /app/examples/octopus/run_detector.py --config <absolute path to FL detector0 config file>/detector1.yaml
