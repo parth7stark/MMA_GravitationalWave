@@ -164,6 +164,13 @@ To build the Apptainer images, you need to be on the Polaris compute nodes. Foll
    export HTTPS_PROXY=http://proxy.alcf.anl.gov:3128
    export http_proxy=http://proxy.alcf.anl.gov:3128
    export https_proxy=http://proxy.alcf.anl.gov:3128
+
+   export BASE_SCRATCH_DIR=/local/scratch/ # For Polaris
+   export APPTAINER_TMPDIR=$BASE_SCRATCH_DIR/apptainer-tmpdir
+   mkdir -p $APPTAINER_TMPDIR
+
+   export APPTAINER_CACHEDIR=$BASE_SCRATCH_DIR/ apptainer-cachedir
+   mkdir -p $APPTAINER_CACHEDIR
    ```
 
 3. **Load Apptainer Module:**
@@ -206,14 +213,5 @@ To start the server or detectors, execute the following commands from the login 
     python /app/examples/octopus/run_detector.py --config <absolute path to FL detectorX config file>/detectorX.yaml
     ```
     
-
-## Todo List and Project Plan
-Please refer to our Box folder for the latest project tasks and roadmap: [Link](https://www.overleaf.com/project/66bce960bfb79d8b86fcfdf3)
-
 ## Related Projects
-This repo focuses on radio wave data. For gravitational wave analysis, please visit [Radio Wave Analysis Repo](https://github.com/parth7stark/MMA_RadioWave/tree/main). Together, these repositories work within the multimessenger framework to capture and analyze various cosmic events.
-
-## Future Plans
-- Integration of additional messenger types (e.g., neutrinos, gamma rays)
-- Real-time data streaming and event detection
-- Cross-correlation between different datasets for enhanced analysis
+This repo focuses on gravitational wave data. For radio wave and joint analysis, please visit [Radio Wave Analysis Repo](https://github.com/parth7stark/MMA_RadioWave/tree/main) and [GW-RW Joint Analysis Repo](https://github.com/parth7stark/MMA_MultimessengerAnalysis/tree/main). Together, these repositories work within the multimessenger framework to capture and analyze various cosmic events.
