@@ -1,0 +1,12 @@
+[base]
+stream_type = "redpanda"
+
+[producer]
+bootstrap_servers = ["redpanda-0:9092"]
+
+[consumer]
+bootstrap_servers = ["redpanda-0:9092"]
+topic = "MMA_GW_Events_shared"
+group_id = "mma-GW-Livingston"
+enable_auto_commit = true
+auto_offset_reset = "earliest"

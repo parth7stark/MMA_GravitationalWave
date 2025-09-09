@@ -37,11 +37,11 @@ setuptools.setup(
     packages=setuptools.find_packages(where="src"),
     python_requires=">=3.10",
     install_requires=[
-        "numpy",  #installing specific version after pip install .
-        "torch",  #installing specific version after pip install .
+        "numpy",  # installing specific version after pip install .
+        "torch",  # installing specific version after pip install .
         "omegaconf",
         "diaspora-event-sdk[kafka-python]",
-        # "lalsuite", installing using conda (refer apptainer defination file) before pip install . setup.py
+        # "lalsuite",  # installing using conda (refer apptainer defination file) before pip install . setup.py
         "boto3",
         "botocore",
         "proxystore[all]",
@@ -53,12 +53,10 @@ setuptools.setup(
         "h5py",
         "scipy",
         "matplotlib",
-
     ],
     extras_require={
         "examples": [
-            "tqdm", # used by run_detector.py
+            "tqdm",  # used by run_detector.py
         ],
     },
-   
 )

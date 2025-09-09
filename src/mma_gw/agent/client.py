@@ -9,6 +9,8 @@ from mma_gw.logger import ClientAgentFileLogger
 from mma_gw.model.GW_client_model import ClientModel
 import h5py
 
+from mma_gw.agent.utils import get_proxystore_connector
+
 
 class ClientAgent:
     """
@@ -193,44 +195,15 @@ class ClientAgent:
             self.use_proxystore = True
             self.proxystore = Store(
                 name="mma-gw-proxystore",
-                connector=self.get_proxystore_connector(
+                connector=get_proxystore_connector(
                     self.client_agent_config.comm_configs.proxystore_configs.connector_type,
                     self.client_agent_config.comm_configs.proxystore_configs.connector_configs,
+                    self.logger,
                 ),
             )
             self.logger.info(
                 f"Detector using proxystore for model embeddings transfer with store: {self.client_agent_config.comm_configs.proxystore_configs.connector_type}."
             )
-
-    def get_proxystore_connector(
-        self,
-        connector_name,
-        connector_args,
-    ):
-        assert connector_name in [
-            "RedisConnector",
-            "FileConnector",
-            "EndpointConnector",
-        ], f"Invalid connector name: {connector_name}, only RedisConnector, FileConnector, and EndpointConnector are supported"
-        if connector_name == "RedisConnector":
-            from proxystore.connectors.redis import RedisConnector
-
-            connector = RedisConnector(**connector_args)
-        elif connector_name == "FileConnector":
-            from proxystore.connectors.file import FileConnector
-
-            connector = FileConnector(**connector_args)
-        elif connector_name == "EndpointConnector":
-            from proxystore.connectors.endpoint import EndpointConnector
-
-            endpoints = connector_args.pop("endpoints")
-            for i, e in enumerate(endpoints):
-                if "PROXYSTORE" in e:
-                    endpoints[i] = os.getenv(e, e)
-
-            connector_args["endpoints"] = endpoints
-            connector = EndpointConnector(**connector_args)
-        return connector
 
     def load_inference_data(self, dataset_file) -> None:
         """Get local strain data for Inference."""

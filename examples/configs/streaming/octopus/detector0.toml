@@ -1,0 +1,12 @@
+[base]
+stream_type = "octopus"
+
+[producer]
+bootstrap_servers = "b-1-public.diaspora.jdqn8o.c18.kafka.us-east-1.amazonaws.com:9198,b-2-public.diaspora.jdqn8o.c18.kafka.us-east-1.amazonaws.com:9198"
+
+[consumer]
+bootstrap_servers = "b-1-public.diaspora.jdqn8o.c18.kafka.us-east-1.amazonaws.com:9198,b-2-public.diaspora.jdqn8o.c18.kafka.us-east-1.amazonaws.com:9198"
+topics = "MMA_GW_Events_shared"
+group_id = "mma-GW-Livingston"
+enable_auto_commit = true
+auto_offset_reset = "earliest"

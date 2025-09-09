@@ -18,7 +18,7 @@ done
 
 proxystore-endpoint list
 proxystore-endpoint configure ${PROXYSTORE_ENDPOINT_NAME}
-proxystore-endpoint start ${PROXYSTORE_ENDPOINT_NAME}
+proxystore-endpoint --log-level DEBUG start ${PROXYSTORE_ENDPOINT_NAME}
 
 log_file="$HOME/.local/share/proxystore/${PROXYSTORE_ENDPOINT_NAME}/log.txt"
 
@@ -34,5 +34,6 @@ while true; do
 done
 
 export PROXYSTORE_DETECTOR_ENDPOINT=$(proxystore-endpoint list | grep ${PROXYSTORE_ENDPOINT_NAME} | awk '{print $NF}')
+echo ${PROXYSTORE_DETECTOR_ENDPOINT} > /app/.proxystore/${DETECTOR_ID}
 
 python /app/examples/octopus/run_detector.py --config ${CONFIGURATION_FILE}

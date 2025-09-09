@@ -5,7 +5,8 @@ import numpy as np
 from .GW_aggregator_utils import *
 from lal import gpstime
 
-class GWAggregator():
+
+class GWAggregator:
     """
     GWAggregator:
         Aggregator for vertical federated learning, which takes in local embeddings from clients,
@@ -13,6 +14,7 @@ class GWAggregator():
         sends back the gradient of the loss with respect to the concatenated embeddings to the clients
         for them to update their local embedding models.
     """
+
     def __init__(
         self,
         model: torch.nn.Module | None = None,
@@ -25,16 +27,13 @@ class GWAggregator():
         self.aggregator_configs = aggregator_configs
         self.device = self.aggregator_configs.get("device", "cpu")
         self.model.to(self.device)
-       
-        
-        
+
         # # Collect final predictions
         # Use dictionaries to store predictions in correct order
-        # e.g., self.predictions_0[batch_id] = np.array([...]) 
+        # e.g., self.predictions_0[batch_id] = np.array([...])
         #       self.predictions_5[batch_id] = np.array([...])
         self.predictions_0 = {}
         self.predictions_5 = {}
-
 
         # Our local aggregator: store partial embeddings until we have both detectors.
         # aggregator[(batch_id, shift)] = {0: embedding0, 1: embedding1}
@@ -42,18 +41,22 @@ class GWAggregator():
 
         # Track which clients have finished
         self.completed_clients = set()
-        self.expected_clients = { "0", "1" }  # Adjust as needed
-        
+        self.expected_clients = {"0", "1"}  # Adjust as needed
 
     def process_embeddings_message(self, batch_id, shift, det_id, local_embedding):
-        
-        print(f"[Server] Received Embeddings: detector_id={det_id}, "
-              f"batch_id={batch_id}, shift={shift}", flush=True)
+
+        print(
+            f"[Server] Received Embeddings: detector_id={det_id}, "
+            f"batch_id={batch_id}, shift={shift}",
+            flush=True,
+        )
         print(f"embedding.shape={tuple(local_embedding.shape)}", flush=True)
 
-        self.logger.info(f"[Server] Received Embeddings: detector_id={det_id}, "
-              f"batch_id={batch_id}, shift={shift}")
-        
+        self.logger.info(
+            f"[Server] Received Embeddings: detector_id={det_id}, "
+            f"batch_id={batch_id}, shift={shift}"
+        )
+
         key = (batch_id, shift)
         if key not in self.aggregator:
             self.aggregator[key] = {}
@@ -64,16 +67,12 @@ class GWAggregator():
         if "0" in self.aggregator[key] and "1" in self.aggregator[key]:
             local_embeddings = {
                 "0": {"inference_embedding": self.aggregator[key]["0"]},
-                "1": {"inference_embedding": self.aggregator[key]["1"]}
+                "1": {"inference_embedding": self.aggregator[key]["1"]},
             }
             self.inference(local_embeddings, batch_id=batch_id, shift=shift)
             del self.aggregator[key]
 
-    def inference(
-        self, 
-        local_embeddings: Dict[str, Dict], 
-        **kwargs
-    ):
+    def inference(self, local_embeddings: Dict[str, Dict], **kwargs):
         """
         Aggregate client embeddings for inference using a GNN-based server model.
 
@@ -90,28 +89,30 @@ class GWAggregator():
         """
 
         # Extract embeddings from each client - the client_Id should be 0 or 1 and not client_1 and client_2. Otherwise below code will fail
-        x_A_infer = local_embeddings['0']['inference_embedding']
-        x_B_infer = local_embeddings['1']['inference_embedding']
-        
+        x_A_infer = local_embeddings["0"]["inference_embedding"]
+        x_B_infer = local_embeddings["1"]["inference_embedding"]
+
         x_A_infer = x_A_infer.to(self.device)
         x_B_infer = x_B_infer.to(self.device)
 
-        append_in =  kwargs["shift"]
+        append_in = kwargs["shift"]
         batch_id = kwargs["batch_id"]
 
         with torch.no_grad():
             self.model.eval()
             outputs = self.model(x_A_infer, x_B_infer)
-            
-            if append_in=='preds_0':
-                self.predictions_0[batch_id]=(outputs.detach().cpu().numpy())
-            else:
-                self.predictions_5[batch_id]=(outputs.detach().cpu().numpy())
 
-    def process_post_process_message(self, producer, topic, det_id, status, GPS_start_time):
+            if append_in == "preds_0":
+                self.predictions_0[batch_id] = outputs.detach().cpu().numpy()
+            else:
+                self.predictions_5[batch_id] = outputs.detach().cpu().numpy()
+
+    def process_post_process_message(
+        self, producer, topic, det_id, status, GPS_start_time
+    ):
         """
         Handle "PostProcess" messages. Wait until all clients are done.
-        """    
+        """
         if status == "DONE" and det_id is not None:
             print(f"[Server] Received DONE from detector {det_id}")
             self.logger.info(f"[Server] Received DONE from detector {det_id}")
@@ -122,7 +123,9 @@ class GWAggregator():
             # Check if all expected clients are done
             if self.completed_clients == self.expected_clients:
                 print("[Server] All detectors are DONE. Invoking post_process...")
-                self.logger.info("[Server] All detectors are DONE. Invoking post_process...")
+                self.logger.info(
+                    "[Server] All detectors are DONE. Invoking post_process..."
+                )
                 self.post_process(producer, topic, GPS_start_time)
 
     def post_process(self, producer, topic, GPS_start_time):
@@ -145,15 +148,18 @@ class GWAggregator():
         else:
             preds_5 = np.array([])
 
-        print(f"[Server] Final preds_0 shape: {preds_0.shape}", flush=True)  #length of signal = length of output tensor
+        print(
+            f"[Server] Final preds_0 shape: {preds_0.shape}", flush=True
+        )  # length of signal = length of output tensor
         print(f"[Server] Final preds_5 shape: {preds_5.shape}", flush=True)
 
-        
         width = self.aggregator_configs.post_process_configs.width
         threshold = self.aggregator_configs.post_process_configs.threshold
 
-        triggers = get_triggers(preds_0, preds_5, width, threshold, truncation=0, window_shift=2048)
-       
+        triggers = get_triggers(
+            preds_0, preds_5, width, threshold, truncation=0, window_shift=2048
+        )
+
         """
         triggers is a dictionary of format
         triggers = {
@@ -171,48 +177,50 @@ class GWAggregator():
         """
 
         # Check if we have any detection
-        if 'detection' in triggers and triggers['detection']:
-            print(f"triggers: {triggers}" , flush=True)
+        if "detection" in triggers and triggers["detection"]:
+            print(f"triggers: {triggers}", flush=True)
             self.logger.info(f"triggers: {triggers}")
 
-            # If we have detection, send merger details to Octopus
+            # If we have detection, send merger details to broker
             self.publish_detection_details(producer, topic, triggers, GPS_start_time)
         else:
             # Log that triggers are either empty
             print(f"No detection triggers yet", flush=True)
             self.logger.info("No detection triggers yet")
-                
 
     def publish_detection_details(self, producer, topic, triggers, GPS_start_time):
-       
+
         # Compute GPS detection times
-        gps_detection_times = [GPS_start_time + t for t in triggers['detection']]
+        gps_detection_times = [GPS_start_time + t for t in triggers["detection"]]
         print(f"GPS start time: {GPS_start_time}", flush=True)
         self.logger.info(f"GPS start time: {GPS_start_time}")
 
-
         # Convert GPS detection times to UTC times
-        utc_detection_times = [gpstime.gps_to_utc(gps_time) for gps_time in gps_detection_times]
+        utc_detection_times = [
+            gpstime.gps_to_utc(gps_time) for gps_time in gps_detection_times
+        ]
 
         # Prepare data to send to Kafka
         detection_details = []
         for gps_time, utc_time in zip(gps_detection_times, utc_detection_times):
             print(f"GPS Time: {gps_time} -> UTC Time: {utc_time}", flush=True)
             self.logger.info(f"GPS Time: {gps_time} -> UTC Time: {utc_time}")
-            
+
             detection_detail = {
                 "GPS_time": gps_time,
-                "UTC_time": utc_time.strftime("%Y-%m-%d %H:%M:%S")
+                "UTC_time": utc_time.strftime("%Y-%m-%d %H:%M:%S"),
             }
             detection_details.append(detection_detail)
 
         # Send detection details to Kafka
-        producer.send(topic, value={
-        
-            "EventType": "PotentialMerger",
-            "detection_details": detection_details
-        })
+        producer.send(
+            topic,
+            value={
+                "EventType": "PotentialMerger",
+                "detection_details": detection_details,
+            },
+        )
         producer.flush()
-        
+
         print("[Server] Published PotentialMerger event with GPS time.", flush=True)
         self.logger.info("[Server] Published PotentialMerger event with GPS time.")

@@ -1,16 +1,16 @@
 import argparse
 from omegaconf import OmegaConf
 from mma_gw.agent import ServerAgent
-from mma_gw.communicator.octopus import OctopusServerCommunicator
+from mma_gw.communicator import ServerCommunicator
 import json
 import traceback
 
 argparser = argparse.ArgumentParser()
 argparser.add_argument(
-    "--config", 
-    type=str, 
+    "--config",
+    type=str,
     default="examples/configs/server.yaml",
-    help="Path to the configuration file."
+    help="Path to the configuration file.",
 )
 
 args = argparser.parse_args()
@@ -22,7 +22,7 @@ server_agent_config = OmegaConf.load(args.config)
 server_agent = ServerAgent(server_agent_config=server_agent_config)
 
 # Create server-side communicator
-communicator = OctopusServerCommunicator(
+communicator = ServerCommunicator(
     server_agent,
     logger=server_agent.logger,
 )
@@ -38,9 +38,9 @@ server_agent.logger.info("[Server] Listening for messages...")
 for msg in communicator.consumer:
     topic = msg.topic
     try:
-        data_str = msg.value.decode("utf-8")  # decode to string
-        data = json.loads(data_str)          # parse JSON to dict
-
+        # data_str = msg.value.decode("utf-8")  # decode to string
+        # data = json.loads(data_str)  # parse JSON to dict
+        data = msg.value
         Event_type = data["EventType"]
 
         if Event_type == "SendEmbeddings":
@@ -53,11 +53,11 @@ for msg in communicator.consumer:
             # not triggering anything on server side
             continue
 
-        elif Event_type == "DetectorReady":  
+        elif Event_type == "DetectorReady":
             # Detector connected and ready for inference
             # not triggering anything on server side, just publishing event to octopus fabric
             # Keep on listening other events
-            continue 
+            continue
 
             # Later we will keep track of connected detectors and check if anyone got disconnected
 
@@ -66,25 +66,40 @@ for msg in communicator.consumer:
             continue
 
         else:
-            print(f"[Server] Unknown Event Type in topic ({topic}): {Event_type}", flush=True)
-            server_agent.logger.info(f"[Server] Unknown Event Type in topic ({topic}): {Event_type}")
+            print(
+                f"[Server] Unknown Event Type in topic ({topic}): {Event_type}",
+                flush=True,
+            )
+            server_agent.logger.info(
+                f"[Server] Unknown Event Type in topic ({topic}): {Event_type}"
+            )
 
     except json.JSONDecodeError as e:
         # Handle invalid JSON messages
-        print(f"[Server] JSONDecodeError for message from topic ({topic}): {e}", flush=True)
-        server_agent.logger.error(f"[Server] JSONDecodeError for message from topic ({topic}): {e}")
-    
+        print(
+            f"[Server] JSONDecodeError for message from topic ({topic}): {e}",
+            flush=True,
+        )
+        server_agent.logger.error(
+            f"[Server] JSONDecodeError for message from topic ({topic}): {e}"
+        )
+
     except Exception as e:
         # Catch-all for other unexpected exceptions
-        """Octopus down or got a message which doesn't have 'EventType' key"""
-        
+        """Streaming broker down or got a message which doesn't have 'EventType' key"""
+
         # Log the traceback
         tb = traceback.format_exc()
 
-        print(f"[Server] Unexpected error while processing message from topic ({topic}): {e}", flush=True)
+        print(
+            f"[Server] Unexpected error while processing message from topic ({topic}): {e}",
+            flush=True,
+        )
         print(f"[Server] Raw message: {msg}", flush=True)
         print(f"[Server] Traceback: {tb}", flush=True)
 
-        server_agent.logger.error(f"[Server] Unexpected error while processing message from topic ({topic}): {e}")
+        server_agent.logger.error(
+            f"[Server] Unexpected error while processing message from topic ({topic}): {e}"
+        )
         server_agent.logger.error(f"[Server] Raw message: {msg}")
         server_agent.logger.error(f"[Server] Traceback: {tb}")

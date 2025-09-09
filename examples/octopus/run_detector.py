@@ -1,7 +1,7 @@
 import argparse
 from omegaconf import OmegaConf
 from mma_gw.agent import ClientAgent
-from mma_gw.communicator.octopus import OctopusClientCommunicator
+from mma_gw.communicator import ClientCommunicator
 
 from mma_gw.generator.inference_utils import *
 from tqdm import tqdm
@@ -11,10 +11,10 @@ import json
 
 argparser = argparse.ArgumentParser()
 argparser.add_argument(
-    "--config", 
-    type=str, 
+    "--config",
+    type=str,
     default="examples/configs/client1.yaml",
-    help="Path to the configuration file."
+    help="Path to the configuration file.",
 )
 args = argparser.parse_args()
 
@@ -25,37 +25,44 @@ client_agent_config = OmegaConf.load(args.config)
 client_agent = ClientAgent(client_agent_config=client_agent_config)
 
 # Create client-side communicator
-client_communicator = OctopusClientCommunicator(
+client_communicator = ClientCommunicator(
     client_agent,
-    client_id = client_agent.get_id(),
+    client_id=client_agent.get_id(),
     logger=client_agent.logger,
-
 )
 
-print(f"[Detector {client_agent.get_id()}] Waiting for ServerStarted event...", flush=True)
-client_agent.logger.info(f"[Detector {client_agent.get_id()}] Waiting for ServerStarted event...")
+print(
+    f"[Detector {client_agent.get_id()}] Waiting for ServerStarted event...", flush=True
+)
+client_agent.logger.info(
+    f"[Detector {client_agent.get_id()}] Waiting for ServerStarted event..."
+)
 
 # 1) Wait for ServerStarted event
 for msg in client_communicator.consumer:
     client_agent.logger.info(f"[Detector {client_agent.get_id()}] msg: {msg}")
 
-    data_str = msg.value.decode("utf-8")
-    data = json.loads(data_str)
+    # data_str = msg.value.decode("utf-8")
+    # data = json.loads(data_str)
+    data = msg.value
 
     Event_type = data["EventType"]
 
-    if Event_type == "ServerStarted":        
+    if Event_type == "ServerStarted":
         client_communicator.on_server_started(data)
         break  # We can break from the loop as we only need that single event
-    
+
 
 #  Start producing embeddings
-print(f"[Detector {client_agent.get_id()}] ready for inference. Now computing embeddings and sending to server...")
-client_agent.logger.info(f"[Detector {client_agent.get_id()}] ready for inference. Now computing embeddings and sending to server...")
+print(
+    f"[Detector {client_agent.get_id()}] ready for inference. Now computing embeddings and sending to server..."
+)
+client_agent.logger.info(
+    f"[Detector {client_agent.get_id()}] ready for inference. Now computing embeddings and sending to server..."
+)
 
 
-
-if client_agent.client_agent_config.generator_configs.do_inference==False:
+if client_agent.client_agent_config.generator_configs.do_inference == False:
     print("Fine-tuning workflow to be implemented")
     # Implement fine-tuning workflow using Octopus [TODO]
 
@@ -64,10 +71,12 @@ else:
 
     # Read the inference dataset (replaced glob, performing inference on only 1 hdf5 file)
     data_dir = client_agent.client_agent_config.inference_configs.dataset_path
-    dataset_name = data_dir.split('/')[-1].split('_')[0]
+    dataset_name = data_dir.split("/")[-1].split("_")[0]
 
     print(f"Performing inference on {dataset_name} dataset", flush=True)
-    client_agent.logger.info(f"[Detector {client_agent.get_id()}] Performing inference on {dataset_name} dataset")
+    client_agent.logger.info(
+        f"[Detector {client_agent.get_id()}] Performing inference on {dataset_name} dataset"
+    )
 
     # Load strains at the detector (local data)
     strain_data, GPSStartTime = client_agent.load_inference_data(data_dir)
@@ -77,16 +86,29 @@ else:
     - Normalize the strain
     - Trim the strain according to length paramter ([For testing purposes] Only take a certain length of strain for inference)
     """
-    preprocessed_strain_data = preprocess(strain_data, client_agent.client_agent_config.inference_configs.length)
+    preprocessed_strain_data = preprocess(
+        strain_data, client_agent.client_agent_config.inference_configs.length
+    )
 
     # Create datagenerators
-    dataloader_0 = TimeSeriesDataset(data=preprocessed_strain_data, targets=preprocessed_strain_data, length=4096, stride=4096, start_index=0)
-    dataloader_5 = TimeSeriesDataset(data=preprocessed_strain_data, targets=preprocessed_strain_data, length=4096, stride=4096, start_index=2047)
-    
+    dataloader_0 = TimeSeriesDataset(
+        data=preprocessed_strain_data,
+        targets=preprocessed_strain_data,
+        length=4096,
+        stride=4096,
+        start_index=0,
+    )
+    dataloader_5 = TimeSeriesDataset(
+        data=preprocessed_strain_data,
+        targets=preprocessed_strain_data,
+        length=4096,
+        stride=4096,
+        start_index=2047,
+    )
+
     config_batch_size = client_agent.client_agent_config.inference_configs.batch_size
     dataloader_0 = DataLoader(dataloader_0, batch_size=config_batch_size, shuffle=False)
     dataloader_5 = DataLoader(dataloader_5, batch_size=config_batch_size, shuffle=False)
-   
 
     """
     for batch in dataloader:
@@ -98,10 +120,10 @@ else:
     print("Predicting 0")
 
     batch_no = 0
-    for inputs in tqdm(dataloader_0, desc='Predicting 0', leave=True, disable=False):
+    for inputs in tqdm(dataloader_0, desc="Predicting 0", leave=True, disable=False):
         client_agent.compute_embeddings(inputs[0])
         local_embeddings = client_agent.get_parameters()
-        
+
         """
         local_embeddings is a dictionary of format
             return {
@@ -117,36 +139,41 @@ else:
 
        """
 
-        local_embedding_tensor = local_embeddings['inference_embedding']
-        
-        print("Data type of tensor: ", flush=True)
-        print(local_embedding_tensor.dtype, flush=True)  
+        local_embedding_tensor = local_embeddings["inference_embedding"]
 
-        print("Tensor shape: ", local_embedding_tensor.shape, flush=True )    
-        
-        client_communicator.send_embeddings_inference_Octopus(local_embedding_tensor, append_in="preds_0", batch_id = batch_no)
+        print("Data type of tensor: ", flush=True)
+        print(local_embedding_tensor.dtype, flush=True)
+
+        print("Tensor shape: ", local_embedding_tensor.shape, flush=True)
+
+        client_communicator.send_embeddings_inference(
+            local_embedding_tensor, append_in="preds_0", batch_id=batch_no
+        )
         batch_no = batch_no + 1
-        
+
         # Async don't wait for acknowledgement --> keep on sending embeddings to evetn fabric
 
-            
     print("Predicting 5")
     batch_no = 0
-    for inputs in tqdm(dataloader_5, desc='Predicting 5', leave=True, disable=False):
+    for inputs in tqdm(dataloader_5, desc="Predicting 5", leave=True, disable=False):
         client_agent.compute_embeddings(inputs[0])
         local_embeddings = client_agent.get_parameters()
-        local_embedding_tensor = local_embeddings['inference_embedding']
-        
-        client_communicator.send_embeddings_inference_Octopus(local_embedding_tensor, append_in="preds_5", batch_id = batch_no)
+        local_embedding_tensor = local_embeddings["inference_embedding"]
+
+        client_communicator.send_embeddings_inference(
+            local_embedding_tensor, append_in="preds_5", batch_id=batch_no
+        )
         batch_no = batch_no + 1
-        
-    
+
     elapsed_time = time.time() - start_time
     print(f"Time to make predictions: {elapsed_time:.2f} seconds", flush=True)
-    
 
-    print(f"[Detector {client_agent.get_id()}] Invoking post-process pipeline", flush=True)
-    client_agent.logger.info(f"[Detector {client_agent.get_id()}] Invoking post-process pipeline")
+    print(
+        f"[Detector {client_agent.get_id()}] Invoking post-process pipeline", flush=True
+    )
+    client_agent.logger.info(
+        f"[Detector {client_agent.get_id()}] Invoking post-process pipeline"
+    )
 
     client_communicator.invoke_post_process(GPSStartTime)
 

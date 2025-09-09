@@ -5,7 +5,7 @@ set -x
 endpoint_name='mma-server'
 proxystore-endpoint list
 proxystore-endpoint configure ${endpoint_name}
-proxystore-endpoint start ${endpoint_name}
+proxystore-endpoint --log-level DEBUG start ${endpoint_name}
 
 log_file="$HOME/.local/share/proxystore/${endpoint_name}/log.txt"
 
@@ -22,5 +22,23 @@ done
 
 uuid=$(proxystore-endpoint list | grep ${endpoint_name} | awk '{print $NF}')
 echo ${uuid} > /app/.proxystore/server
+
+export PROXYSTORE_SERVER_ENDPOINT=${uuid}
+
+for ((i=0;i<${NDETECTORS};i++))
+do
+    detector_file="/app/.proxystore/detector${i}"
+
+    # Get server endpoint UUID
+    while true; do
+        if [ -s "${detector_file}" ]
+        then
+            export PROXYSTORE_DETECTOR${i}_ENDPOINT=$(cat "$detector_file")
+            break
+        fi
+        ls ${detector_file}
+    done
+
+done
 
 python /app/examples/octopus/run_server.py --config examples/configs/FLserver.yaml
