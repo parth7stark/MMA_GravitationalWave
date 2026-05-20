@@ -1,7 +1,7 @@
 client_id: "0"
 generator_configs:
   # Device to use: cpu or cuda
-  device: "cpu"
+  device: "cuda"
   logging_id: "LIGO_Livingston"
   logging_output_dirname: "/app/examples/output"
   logging_output_filename: "result"

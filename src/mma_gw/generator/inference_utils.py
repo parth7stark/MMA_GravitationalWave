@@ -2,8 +2,15 @@ import numpy as np
 import torch
 from torch.utils.data import Dataset, DataLoader
 
+# def normalize(strain):
+#     std = np.std(strain[:])
+#     strain[:] /= std
+#     return strain
+
 def normalize(strain):
     std = np.std(strain[:])
+    mean=np.mean(strain[:])
+    strain[:]+=-mean
     strain[:] /= std
     return strain
 

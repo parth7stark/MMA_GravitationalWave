@@ -38,6 +38,9 @@ module list
 # Change directory to the cloned repo
 cd <path to cloned repo>
 
+# Start proxystore endpoint on the node (compute/login) where server will run
+#proxystore-endpoint start mma_gw_server
+
 apptainer exec --nv \
   MMA_GW_Inference_miniapp.sif \
   python /app/examples/octopus/run_server.py --config <absolute path to FL server config file>/FLserver.yaml
