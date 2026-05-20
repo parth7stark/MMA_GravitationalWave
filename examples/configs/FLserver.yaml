@@ -22,15 +22,18 @@ server_configs:
 
   # define server side kafka parameters here like consumer settings (offset policy)
   comm_configs:
-    stream_config: "examples/configs/streaming/octopus/FLserver.toml"
+    stream_config: "examples/configs/streaming/files/FLserver.toml"
     producer_topic: "MMA_GW_Events_shared"
     proxystore_configs:
       enable_proxystore: True
-      connector_type: "EndpointConnector"
+      connector_type: "FileConnector"
       connector_configs:
-        endpoints:
-          [
-            "PROXYSTORE_SERVER_ENDPOINT",
-            "PROXYSTORE_DETECTOR0_ENDPOINT",
-            "PROXYSTORE_DETECTOR1_ENDPOINT",
-          ]
+        store_dir: "/app/ps-out"
+      # connector_type: "EndpointConnector"
+      # connector_configs:
+      #   endpoints:
+      #     [
+      #       "PROXYSTORE_SERVER_ENDPOINT",
+      #       "PROXYSTORE_DETECTOR0_ENDPOINT",
+      #       "PROXYSTORE_DETECTOR1_ENDPOINT",
+      #     ]

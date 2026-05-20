@@ -1,0 +1,8 @@
+[base]
+stream_type = "files"
+
+[producer]
+root_path = "stream"
+
+[consumer]
+root_path = "stream"

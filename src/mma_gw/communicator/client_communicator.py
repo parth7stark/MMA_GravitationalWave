@@ -1,4 +1,7 @@
 import json
+import tomllib
+import time
+
 from omegaconf import OmegaConf, DictConfig
 from proxystore.proxy import Proxy, extract
 from typing import Union, Dict, OrderedDict, Tuple, Optional, Any
@@ -6,7 +9,7 @@ from mma_gw.agent import ClientAgent
 from .utils import serialize_tensor_to_base64, deserialize_tensor_from_base64
 from mma_gw.logger import ClientAgentFileLogger
 
-import streaming
+from diaspora_stream.api import Driver
 
 
 class ClientCommunicator:
@@ -29,14 +32,22 @@ class ClientCommunicator:
         self.client_agent = client_agent
         self.logger = logger if logger is not None else self._default_logger()
 
-        self.topic = self.client_agent.client_agent_config.comm_configs.producer_topic
+        self.topic_name = self.client_agent.client_agent_config.comm_configs.producer_topic
 
         # Kafka producer for control messages and sending Embeddings
-        s = streaming.from_config(
-            self.client_agent.client_agent_config.comm_configs.stream_config
-        )
-        self.producer = s.producer
-        self.consumer = s.consumer
+        with open(self.client_agent.client_agent_config.comm_configs.stream_config, 'rb') as f:
+            conf = tomllib.load(f)
+
+        self.driver = Driver(backend=conf['base']['stream_type'], options=conf['producer'])
+
+        if not self.driver.topic_exists(self.topic_name):
+            self.driver.create_topic(name=self.topic_name)
+
+        self.topic = self.driver.open_topic(self.topic_name)
+
+
+        self.producer = self.topic.producer(f'producer-client_comm')
+        self.consumer = self.topic.consumer(f'producer-client_comm')
 
     def on_server_started(self, data):
         """
@@ -57,8 +68,9 @@ class ClientCommunicator:
 
         # Now publish "DetectorReady"
         ready_msg = {"EventType": "DetectorReady", "Detector_id": self.client_id}
-        self.producer.send(self.topic, ready_msg)
-        self.producer.flush()
+        self.producer.push(ready_msg).wait(timeout_ms=10000)
+        self.producer.flush().wait(timeout_ms=10000)
+
         print(f"[Detector {self.client_id}] Published DetectorReady event.")
         self.logger.info(f"[Detector {self.client_id}] Published DetectorReady event.")
 
@@ -91,9 +103,8 @@ class ClientCommunicator:
             "embedding": embedding_b64,
         }
 
-        self.producer.send(self.topic, metadata=data)
-
-        self.producer.flush()
+        self.producer.push(data).wait(timeout_ms=10000)
+        self.producer.flush().wait(timeout_ms=10000)
 
         print(
             f"[Detector {client_id}] Sent Embeddings: batch_id={kwargs['batch_id']}, shift={kwargs['append_in']}",
@@ -121,7 +132,8 @@ class ClientCommunicator:
             "GPS_start_time": GPSStartTime,
         }
 
-        self.producer.send(self.topic, done_msg)
+        self.producer.push(done_msg).wait(timeout_ms=10000)
+        self.producer.flush().wait(timeout_ms=10000)
 
         print(
             f"[Detector {detector_id}] Publish PostProcess Event: GPS start time={GPSStartTime}",
@@ -134,6 +146,26 @@ class ClientCommunicator:
         self.producer.flush()
 
         return
+
+    def get_event(self):
+        """Consumes next event."""
+        
+        timeout = 10000  # to ms
+        future = self.consumer.pull()
+        event = None
+
+        start = time.time()
+        while event is None:
+            event = future.wait(timeout_ms=timeout)
+            if time.time() - start > 60:
+                break
+
+        if event is None:
+            raise TimeoutError(f'Consumer {queue} timed out waiting for message.')
+
+        event.acknowledge()
+
+        return event
 
     def _default_logger(self):
         """Create a default logger for the server if no logger provided."""

@@ -38,13 +38,19 @@ client_agent.logger.info(
     f"[Detector {client_agent.get_id()}] Waiting for ServerStarted event..."
 )
 
+timeout = 1000
 # 1) Wait for ServerStarted event
-for msg in client_communicator.consumer:
-    client_agent.logger.info(f"[Detector {client_agent.get_id()}] msg: {msg}")
+while True:
+    event = client_communicator.get_event()
+    topic = client_communicator.topic_name
+    # try:
+    data = event.metadata # decode to string
+    #data = json.loads(data_str)          # parse JSON to dict
+
+    client_agent.logger.info(f"[Detector {client_agent.get_id()}] msg: {event}")
 
     # data_str = msg.value.decode("utf-8")
     # data = json.loads(data_str)
-    data = msg.value
 
     Event_type = data["EventType"]
 

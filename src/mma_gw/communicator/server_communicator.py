@@ -1,4 +1,6 @@
+import tomllib
 import json
+import time
 import logging
 from typing import Optional
 from omegaconf import OmegaConf
@@ -10,6 +12,8 @@ from .utils import serialize_tensor_to_base64, deserialize_tensor_from_base64
 from proxystore.proxy import Proxy, extract
 
 import streaming
+
+from diaspora_stream.api import Driver
 
 
 class ServerCommunicator:
@@ -27,18 +31,31 @@ class ServerCommunicator:
         self.server_agent = server_agent
         self.logger = logger if logger is not None else self._default_logger()
 
-        self.topic = (
+        self.topic_name = (
             self.server_agent.server_agent_config.server_configs.comm_configs.producer_topic
         )
 
-        s = streaming.from_config(
-            self.server_agent.server_agent_config.server_configs.comm_configs.stream_config
-        )
-        # Kafka producer for publishing messages
-        self.producer = s.producer
+        with open(self.server_agent.server_agent_config.server_configs.comm_configs.stream_config, 'rb') as f:
+            conf = tomllib.load(f)
 
-        # Kafka consumer to listen for control events AND embeddings
-        self.consumer = s.consumer
+        self.driver = Driver(backend=conf['base']['stream_type'], options=conf['producer'])
+
+        if not self.driver.topic_exists(self.topic_name):
+            self.driver.create_topic(name=self.topic_name)
+
+        self.topic = self.driver.open_topic(self.topic_name)
+
+
+        self.producer = self.topic.producer(f'producer-client_comm')
+        self.consumer = self.topic.consumer(f'producer-client_comm')
+        # s = streaming.from_config(
+        #     self.server_agent.server_agent_config.server_configs.comm_configs.stream_config
+        # )
+        # Kafka producer for publishing messages
+        # self.producer = s.producer
+
+        # # Kafka consumer to listen for control events AND embeddings
+        # self.consumer = s.consumer
 
         # Track readiness, which detector is connected and ready for inference
         self.detectors_ready = set()
@@ -62,8 +79,8 @@ class ServerCommunicator:
             "detector_config": client_config_dict,
         }
 
-        self.producer.send(self.topic, metadata=event)
-        self.producer.flush()
+        self.producer.push(metadata=event).wait(timeout_ms=10000)
+        self.producer.flush().wait(timeout_ms=10000)
 
         print("[Server] Published ServerStarted event with config.", flush=True)
         self.logger.info("[Server] Published ServerStarted event with config.")
@@ -116,3 +133,23 @@ class ServerCommunicator:
         s_handler.setFormatter(fmt)
         logger.addHandler(s_handler)
         return logger
+
+    def get_event(self):
+        """Consumes next event."""
+        
+        timeout = 10000  # to ms
+        future = self.consumer.pull()
+        event = None
+
+        start = time.time()
+        while event is None:
+            event = future.wait(timeout_ms=timeout)
+            if time.time() - start > 60:
+                break
+
+        if event is None:
+            raise TimeoutError(f'Server {self.topic_name} timed out waiting for message.')
+
+        event.acknowledge()
+
+        return event

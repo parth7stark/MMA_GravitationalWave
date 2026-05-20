@@ -35,12 +35,16 @@ communicator.publish_server_started_event()
 print("[Server] Listening for messages...", flush=True)
 server_agent.logger.info("[Server] Listening for messages...")
 
-for msg in communicator.consumer:
-    topic = msg.topic
+while True:
+    event = communicator.get_event()
+    topic = communicator.topic_name
+    # try:
+    #data_str = event.metadata.decode("utf-8")  # decode to string
+    data = event.metadata #json.loads(data_str)          # parse JSON to dict
     try:
         # data_str = msg.value.decode("utf-8")  # decode to string
         # data = json.loads(data_str)  # parse JSON to dict
-        data = msg.value
+        #data = json.loads(data_str)          # parse JSON to dict
         Event_type = data["EventType"]
 
         if Event_type == "SendEmbeddings":
@@ -95,11 +99,11 @@ for msg in communicator.consumer:
             f"[Server] Unexpected error while processing message from topic ({topic}): {e}",
             flush=True,
         )
-        print(f"[Server] Raw message: {msg}", flush=True)
+        print(f"[Server] Raw message: {event}", flush=True)
         print(f"[Server] Traceback: {tb}", flush=True)
 
         server_agent.logger.error(
             f"[Server] Unexpected error while processing message from topic ({topic}): {e}"
         )
-        server_agent.logger.error(f"[Server] Raw message: {msg}")
+        server_agent.logger.error(f"[Server] Raw message: {event}")
         server_agent.logger.error(f"[Server] Traceback: {tb}")

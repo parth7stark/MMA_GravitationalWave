@@ -15,13 +15,16 @@ model_configs:
   checkpoint_dir: "/app/MMA_GravitationalWave_Data/2channel_ckpts/detector_2_sub_mod_B.ckpt"
 
 comm_configs:
-  stream_config: "examples/configs/streaming/octopus/detector1.toml"
+  stream_config: "examples/configs/streaming/files/detector1.toml"
   producer_topic: "MMA_GW_Events_shared"
   proxystore_configs:
     enable_proxystore: True
-    connector_type: "EndpointConnector"
+    connector_type: "FileConnector"
     connector_configs:
-      endpoints: ["PROXYSTORE_SERVER_ENDPOINT", "PROXYSTORE_DETECTOR_ENDPOINT"]
+      store_dir: "/app/ps-out"
+    # connector_type: "EndpointConnector"
+    # connector_configs:
+    #   endpoints: ["PROXYSTORE_SERVER_ENDPOINT", "PROXYSTORE_DETECTOR_ENDPOINT"]
       #detector2 endpoint, server endpoint
 
     # connector_type: "FileConnector"

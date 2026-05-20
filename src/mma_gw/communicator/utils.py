@@ -1,6 +1,7 @@
 import io
 import torch
 import base64
+import tomllib
 
 
 def serialize_tensor_to_base64(tensor: torch.Tensor) -> str:
@@ -22,5 +23,19 @@ def deserialize_tensor_from_base64(b64_str: str) -> torch.Tensor:
     """
     raw_bytes = base64.b64decode(b64_str)
     buffer = io.BytesIO(raw_bytes)
-    tensor = torch.load(buffer)
+    tensor = torch.load(buffer, weights_only=False)
     return tensor
+
+def load_config(fn: str) -> dict[str, str | dict[str, str]] :
+    """ Read stream configuration file.
+    
+    keyword args:
+        fn (str): filepath of configuration file
+    
+    outputs:
+        the loaded configuration file as JSON dictionary
+    """
+    
+    data = tomllib.load(fn)
+    return data
+    
